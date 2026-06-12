@@ -1,0 +1,17 @@
+name: build-deploy-dev
+
+jobs:
+  call-workflow:
+    permissions:
+      contents: write
+      id-token: write
+      security-events: write
+      actions: read
+    uses: navikt/mime-deploy/.github/workflows/build-deploy-dev-kotlin.yml@v0
+    with:
+      NAIS_RESOURCE: ".nais/nais.yml"
+      NAIS_VARS: ".nais/nais-dev.json"
+      JAVA_VERSION: 17
+      CODEQL_ENABLED: true
+      DRAFTS_MAX: 50
+    secrets: inherit

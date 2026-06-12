@@ -1,0 +1,97 @@
+micronaut:
+  server:
+    multipart:
+      max-file-size: 30000000
+    port: ${SERVER_PORT:1338}
+    max-request-size: 30000000
+  application:
+    name: hm-finnhjelpemiddel-news
+    thread-selection: auto
+  executors:
+    consumer:
+      type: fixed
+      nThreads: 1
+    io:
+      type: fixed
+      nThreads: 100
+  metrics:
+    enabled: true
+    sensitive: false
+    binders:
+      uptime:
+        enabled: true
+      processor:
+        enabled: true
+      jvm:
+        enabled: true
+      web:
+        enabled: true
+      logback:
+        enabled: true
+    export:
+      prometheus:
+        enabled: true
+        step: PT1M
+        descriptions: true
+  data:
+    pageable:
+      max-page-size: 1000
+  http:
+    client:
+      connect-timeout: 10s
+      read-timeout: 60s
+      event-loop-group: http
+  netty:
+    event-loops:
+      http:
+        num-threads: 25
+        prefer-native-transport: true
+  router:
+    static-resources:
+      swagger:
+        paths: classpath:META-INF/swagger
+        mapping: /swagger/**
+      swagger-ui:
+        paths: classpath:META-INF/swagger/views/swagger-ui
+        mapping: /swagger-ui/**
+endpoints:
+  metrics:
+    enabled: true
+    sensitive: false
+  prometheus:
+    sensitive: false
+    enabled: true
+  all:
+    path: "/internal"
+
+jackson:
+  bean-introspection-module: true
+  serialization:
+    indentOutput: true
+
+datasources:
+  default:
+    url: ${DB_JDBC_URL:`jdbc:tc:postgresql:18:///finnhjelpemiddelnews?TC_TMPFS=/testtmpfs:rw&TC_INITSCRIPT=file:src/test/resources/postgres/postgres-init.sql`}
+    driverClassName: ${DB_DRIVER:org.testcontainers.jdbc.ContainerDatabaseDriver}
+    username: ${DB_USERNAME:finnhjelpemiddelnews}
+    password: ${DB_PASSWORD:finnhjelpemiddelnews}
+    maximum-pool-size: 8
+    minimum-idle: 0
+    pool-name: default
+    dialect: postgres
+
+flyway:
+  datasources:
+    default:
+      locations: classpath:db
+
+azure:
+  client:
+    id: ${AZURE_APP_CLIENT_ID:`123`}
+    secret: ${AZURE_APP_CLIENT_SECRET:`123secret`}
+  scope: ${AZURE_SCOPE_OEBS_PROXY:`123scope`}
+  endpoint: ${AZURE_OPENID_CONFIG_TOKEN_ENDPOINT:`localhost`}
+  grant:
+    type: client_credentials
+  introspection:
+    endpoint: ${NAIS_TOKEN_INTROSPECTION_ENDPOINT:`localhost`}

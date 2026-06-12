@@ -1,0 +1,72 @@
+apiVersion: "nais.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: hm-finnhjelpemiddel-news
+  namespace: teamdigihot
+  labels:
+    team: teamdigihot
+spec:
+  observability:
+    logging:
+      destinations:
+        - id: loki
+        - id: elastic
+  image: {{ image }}
+  port: 8080
+  liveness:
+    path: /internal/isAlive
+    initialDelay: 20
+  readiness:
+    path: /internal/isReady
+    initialDelay: 20
+  replicas:
+    min: {{ min_replicas }}
+    max: {{ max_replicas }}
+    cpuThresholdPercentage: 50
+  resources:
+    limits:
+      memory: 1048Mi
+    requests:
+      cpu: 200m
+      memory: 256Mi
+  prometheus:
+    enabled: true
+    path: /internal/prometheus
+  env:
+    - name: SWAGGER_ENABLED
+      value: "{{ swagger_enabled }}"
+    - name: SERVER_PORT
+      value: "8080"
+    - name: JAVA_OPTS
+      value: "{{ java_opts }}"
+    - name: DB_DRIVER
+      value: "org.postgresql.Driver"
+  {{#each env}}
+    - name: {{@key}}
+      value: "{{this}}"
+  {{/each}}
+  accessPolicy:
+    inbound:
+      rules:
+        - application: hm-oversikt-frontend
+        - application: azure-token-generator
+          namespace: nais
+          cluster: dev-gcp
+  gcp:
+    sqlInstances:
+      - name: hm-finnhjelpemiddel-news-db
+        type: POSTGRES_18
+        tier: {{disk_tier}}
+        diskType: SSD
+        highAvailability: true
+        diskSize: {{disk_size}}
+        diskAutoresize: true
+        autoBackupHour: 3
+        databases:
+          - name: finnhjelpemiddelnews
+            envVarPrefix: DB
+        cascadingDelete: false
+  azure:
+    application:
+      enabled: true
+      allowAllUsers: true
