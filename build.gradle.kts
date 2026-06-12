@@ -23,6 +23,7 @@ val micrometerRegistryPrometheusVersion = "1.16.0"
 val log4jVersion = "2.25.4"
 val mockkVersion = "1.14.2"
 val postgresVersion = "42.7.11"
+val logbackEncoderVersion = "8.0"
 
 dependencies {
     constraints {
@@ -55,6 +56,7 @@ dependencies {
     runtimeOnly("org.yaml:snakeyaml")
 
     implementation("org.apache.logging.log4j:log4j-core:$log4jVersion")
+    api("net.logstash.logback:logstash-logback-encoder:${logbackEncoderVersion}")
 
     implementation("io.micronaut.micrometer:micronaut-micrometer-core")
     implementation("io.micronaut.micrometer:micronaut-micrometer-registry-prometheus")
