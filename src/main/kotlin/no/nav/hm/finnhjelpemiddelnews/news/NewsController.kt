@@ -20,7 +20,7 @@ class NewsController(
     }
 
     @Get("/{news}")
-    fun getNews(news: String): HttpResponse<*> = try {
+    fun getNewsByTitle(news: String): HttpResponse<*> = try {
         newsRepository.findByTitle(news)?.let { HttpResponse.ok(it.toOut()) }
             ?: HttpResponse.badRequest("No news with id $news")
     } catch (exception: Exception) {
@@ -28,8 +28,17 @@ class NewsController(
         HttpResponse.serverError(exception.message)
     }
 
+    @Get("/{news}")
+    suspend fun getNewsById(news: UUID): HttpResponse<*> = try {
+        newsRepository.findById(news)?.let { HttpResponse.ok(it.toOut()) }
+            ?: HttpResponse.badRequest("No news with id $news")
+    } catch (exception: Exception) {
+        LOG.error("Error when getting news $news", exception)
+        HttpResponse.serverError(exception.message)
+    }
+
     @Post("/ids")
-    fun getNews( @Body news: List<UUID>): HttpResponse<*> = try {
+    fun getNewsList( @Body news: List<UUID>): HttpResponse<*> = try {
         HttpResponse.ok(news.mapNotNull { runBlocking { newsRepository.findById(it)?.toOut() } })
     } catch (exception: Exception) {
         LOG.error("Error when getting news $news", exception)

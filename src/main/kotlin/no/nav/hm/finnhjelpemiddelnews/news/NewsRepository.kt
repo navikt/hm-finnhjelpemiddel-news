@@ -7,7 +7,5 @@ import java.util.UUID
 
 @JdbcRepository(dialect = Dialect.POSTGRES)
 interface NewsRepository : CoroutineCrudRepository<NewsDto, UUID> {
-    fun findByIdInList(ids: List<UUID>): List<NewsDto>
-
     fun findByTitle(title: String): NewsDto?
 }
