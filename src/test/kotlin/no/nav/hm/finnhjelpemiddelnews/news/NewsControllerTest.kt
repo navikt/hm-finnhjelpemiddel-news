@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import kotlinx.coroutines.runBlocking
 import io.kotest.matchers.shouldBe
 import io.micronaut.http.HttpStatus
+import java.util.UUID
 
 @MicronautTest
 class NewsControllerTest (
@@ -31,10 +32,10 @@ class NewsControllerTest (
         }
     }
 
-//    @Test
-//    fun `Bad path`() {
-//        runBlocking {
-//            newsController.getNewsByTitle("unknown").status shouldBe HttpStatus.BAD_REQUEST
-//        }
-//    }
+    @Test
+    fun `Bad path`() {
+        runBlocking {
+            newsController.getNewsById(UUID.randomUUID()).status shouldBe HttpStatus.NOT_FOUND
+        }
+    }
 }

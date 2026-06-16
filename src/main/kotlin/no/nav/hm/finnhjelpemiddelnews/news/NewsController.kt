@@ -20,10 +20,16 @@ class NewsController(
     }
 
     @Get("/{id}")
-    suspend fun getNewsById(id: UUID): HttpResponse<NewsDto> =
+     fun getNewsById(id: UUID): HttpResponse<NewsDto> = try {
         newsRepository.findOne(id).let { HttpResponse.ok(it) }
-            ?: HttpResponse.notFound()
+    } catch (exception: Exception) {
+        LOG.error("Feil ved henting av news", exception)
+         HttpResponse.notFound()
+    }
 
+
+
+    //todo fiks dis shit
     @Post("/ids")
     fun getNewsList( @Body news: List<UUID>): HttpResponse<*> = try {
         HttpResponse.ok(news.mapNotNull { runBlocking { newsRepository.findById(it)} })
