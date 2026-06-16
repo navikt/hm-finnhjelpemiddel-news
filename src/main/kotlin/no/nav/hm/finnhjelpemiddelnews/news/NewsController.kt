@@ -19,35 +19,16 @@ class NewsController(
         private val LOG = LoggerFactory.getLogger(NewsController::class.java)
     }
 
-    @Get("/{news}")
-    fun getNewsByTitle(news: String): HttpResponse<*> = try {
-        newsRepository.findByTitle(news)?.let { HttpResponse.ok(it.toOut()) }
-            ?: HttpResponse.badRequest("No news with id $news")
-    } catch (exception: Exception) {
-        LOG.error("Error when getting news $news", exception)
-        HttpResponse.serverError(exception.message)
-    }
-
-    @Get("/{newsId}")
-    suspend fun getNewsById(newsId: UUID): HttpResponse<*> = try {
-        newsRepository.findById(newsId)?.let { HttpResponse.ok(it.toOut()) }
-            ?: HttpResponse.badRequest("No news with id $newsId")
-    } catch (exception: Exception) {
-        LOG.error("Error when getting news $newsId", exception)
-        HttpResponse.serverError(exception.message)
-    }
+    @Get("/{id}")
+    suspend fun getNewsById(id: UUID): HttpResponse<NewsDto> =
+        newsRepository.findOne(id).let { HttpResponse.ok(it) }
+            ?: HttpResponse.notFound()
 
     @Post("/ids")
     fun getNewsList( @Body news: List<UUID>): HttpResponse<*> = try {
-        HttpResponse.ok(news.mapNotNull { runBlocking { newsRepository.findById(it)?.toOut() } })
+        HttpResponse.ok(news.mapNotNull { runBlocking { newsRepository.findById(it)} })
     } catch (exception: Exception) {
         LOG.error("Error when getting news $news", exception)
         HttpResponse.serverError(exception.message)
     }
-
-    private fun NewsDto.toOut(): NewsOut = NewsOut(
-        id = id,
-        title = title,
-        data = data
-    )
 }

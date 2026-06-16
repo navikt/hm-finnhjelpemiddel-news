@@ -6,6 +6,6 @@ import io.micronaut.data.repository.kotlin.CoroutineCrudRepository
 import java.util.UUID
 
 @JdbcRepository(dialect = Dialect.POSTGRES)
-interface NewsRepository : CoroutineCrudRepository<NewsDto, UUID> {
-    fun findByTitle(title: String): NewsDto?
+interface NewsRepository : CoroutineCrudRepository<News, UUID> {
+    fun findOne(id: UUID): NewsDto
 }

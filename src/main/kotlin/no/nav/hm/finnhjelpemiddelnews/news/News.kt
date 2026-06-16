@@ -1,35 +1,33 @@
 package no.nav.hm.finnhjelpemiddelnews.news
 
-import com.fasterxml.jackson.databind.JsonNode
+import io.micronaut.core.annotation.Introspected
 import io.micronaut.data.annotation.Id
 import io.micronaut.data.annotation.MappedEntity
-import io.micronaut.data.annotation.TypeDef
-import io.micronaut.data.model.DataType
 import io.micronaut.serde.annotation.Serdeable
 import java.time.LocalDateTime
 import java.util.UUID
 
 @Serdeable
 @MappedEntity("news")
-data class NewsDto(
+data class News(
     @field:Id
     val id: UUID = UUID.randomUUID(),
     val title: String,
-    @field:TypeDef(type = DataType.JSON)
-    val data: JsonNode,
-    val created: LocalDateTime = LocalDateTime.now()
+    val body: String,
+    val created: LocalDateTime = LocalDateTime.now(),
+    val updated: LocalDateTime = LocalDateTime.now()
 )
 
 @Serdeable
 data class CreateNewsDto(
     val title: String,
-    @field:TypeDef(type = DataType.JSON)
-    val data: JsonNode,
+    val body: String,
 )
 
 @Serdeable
-data class NewsOut(
+@Introspected
+data class NewsDto(
     val id: UUID? = UUID.randomUUID(),
     val title: String,
-    val data: JsonNode
+    val body: String,
 )
