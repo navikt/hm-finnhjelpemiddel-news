@@ -28,12 +28,12 @@ class NewsController(
         HttpResponse.serverError(exception.message)
     }
 
-    @Get("/{news}")
-    suspend fun getNewsById(news: UUID): HttpResponse<*> = try {
-        newsRepository.findById(news)?.let { HttpResponse.ok(it.toOut()) }
-            ?: HttpResponse.badRequest("No news with id $news")
+    @Get("/{newsId}")
+    suspend fun getNewsById(newsId: UUID): HttpResponse<*> = try {
+        newsRepository.findById(newsId)?.let { HttpResponse.ok(it.toOut()) }
+            ?: HttpResponse.badRequest("No news with id $newsId")
     } catch (exception: Exception) {
-        LOG.error("Error when getting news $news", exception)
+        LOG.error("Error when getting news $newsId", exception)
         HttpResponse.serverError(exception.message)
     }
 

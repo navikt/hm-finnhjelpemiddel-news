@@ -37,7 +37,7 @@ class NewsAdminController(
     }
 
     @Put("/")
-    suspend fun updateCategory(
+    suspend fun updateNews(
         @Body newsDto: NewsDto): HttpResponse<String> {
         try {
             runBlocking {
