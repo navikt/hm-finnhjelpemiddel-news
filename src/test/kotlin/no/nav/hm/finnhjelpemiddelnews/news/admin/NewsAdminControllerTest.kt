@@ -10,6 +10,7 @@ import no.nav.hm.finnhjelpemiddelnews.news.NewsController
 import no.nav.hm.finnhjelpemiddelnews.news.NewsRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
 @MicronautTest
 class NewsAdminControllerTest (
@@ -60,6 +61,37 @@ class NewsAdminControllerTest (
             fetched.status shouldBe HttpStatus.OK
             fetched.body().body shouldBe "Dette er en oppdatering"
             fetched.body().title shouldBe "Nyhet oppdatering"
+        }
+    }
+
+    @Test
+    fun badDeleteTest() {
+        runBlocking {
+            val dto = CreateNewsDto(title = "Nyhet 3", body = "Dette er ny nyhet")
+            val createdNewsId = newsAdminController.createNews(dto).body()
+
+            newsAdminController.deleteNews(createdNewsId)
+
+
+            val res = newsController.getNewsById(createdNewsId)
+            res.status shouldBe HttpStatus.NOT_FOUND
+        }
+    }
+
+    @Test
+    fun badPostTest() {
+        runBlocking {
+            val dto = CreateNewsDto(title = "", body = "Dette er ny nyhet")
+            val createdNewsId = newsAdminController.createNews(dto)
+
+            createdNewsId.status shouldBe HttpStatus.BAD_REQUEST
+        }
+    }
+
+    @Test
+    fun badPutTest() {
+        runBlocking {
+
         }
     }
 }

@@ -24,12 +24,13 @@ class NewsAdminController(
 
     @Post("/")
      fun createNews(
-        @Body createNewsDto: CreateNewsDto) {
-        try {
+        @Body createNewsDto: CreateNewsDto): HttpResponse<UUID> {
+        return try {
+            if (createNewsDto.title.isBlank()) return HttpResponse.badRequest()
             val news = runBlocking {
                 newsRepository.save(News(title = createNewsDto.title, body = createNewsDto.body))
             }
-            HttpResponse.ok(news.id.toString())
+            HttpResponse.ok(news.id)
         } catch (exception: Exception) {
             LOG.error("Failed to create new news \"$createNewsDto\"", exception)
             HttpResponse.serverError()
@@ -64,6 +65,7 @@ class NewsAdminController(
     ): HttpResponse<String> {
         try {
             runBlocking {
+                if (!newsRepository.existsById(id)) return@runBlocking HttpResponse.badRequest<String>()
                 newsRepository.deleteById(id)
             }
             return HttpResponse.ok("deleted $id")
