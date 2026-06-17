@@ -45,11 +45,10 @@ class NewsAdminController(
         try {
             runBlocking {
                 val news = newsRepository.findById(id)
-
-                news?.body = newsDto.body
-                news?.title = newsDto.title
-
-                newsRepository.update(news as News)
+                if(news != null) {
+                  val updatedNews = news.copy(title = newsDto.title, body = newsDto.body)
+                  newsRepository.update(updatedNews)
+                } else throw Exception("Failed to find news by id $id")
             }
             return HttpResponse.ok("updated $newsDto.id.toString()")
         } catch (exception: Exception) {
