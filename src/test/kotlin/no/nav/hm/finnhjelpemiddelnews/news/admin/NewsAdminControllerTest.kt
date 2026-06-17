@@ -1,6 +1,5 @@
 package no.nav.hm.finnhjelpemiddelnews.news.admin
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.kotest.matchers.shouldBe
 import io.micronaut.http.HttpStatus
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest
@@ -9,10 +8,8 @@ import no.nav.hm.finnhjelpemiddelnews.news.CreateNewsDto
 import no.nav.hm.finnhjelpemiddelnews.news.News
 import no.nav.hm.finnhjelpemiddelnews.news.NewsController
 import no.nav.hm.finnhjelpemiddelnews.news.NewsRepository
-import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.util.UUID
 
 @MicronautTest
 class NewsAdminControllerTest (
@@ -27,8 +24,6 @@ class NewsAdminControllerTest (
         newsRepository.save(newsDto)
         Unit
     }
-
-
 
     @Test
     fun deleteTest() {
@@ -55,9 +50,15 @@ class NewsAdminControllerTest (
     }
 
     @Test
-    fun `Bad path`() {
+    fun putTest() {
         runBlocking {
-            newsController.getNewsById(UUID.randomUUID()).status shouldBe HttpStatus.NOT_FOUND
+            val updatedNews = newsDto.copy(body = "Dette er oppdatering")
+            val response = newsAdminController.updateNews(updatedNews)
+            response.status shouldBe HttpStatus.OK
+
+            val fetched = newsController.getNewsById(newsDto.id)
+            fetched.status shouldBe HttpStatus.OK
+            fetched.body().body shouldBe "Dette er oppdatering"
         }
     }
 }
