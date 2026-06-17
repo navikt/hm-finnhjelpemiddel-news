@@ -12,8 +12,8 @@ import java.util.UUID
 data class News(
     @field:Id
     val id: UUID = UUID.randomUUID(),
-    var title: String,
-    var body: String,
+    val title: String,
+    val body: String,
     val created: LocalDateTime = LocalDateTime.now(),
     val updated: LocalDateTime = LocalDateTime.now()
 )
