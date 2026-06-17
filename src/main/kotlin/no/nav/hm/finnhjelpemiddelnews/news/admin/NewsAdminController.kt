@@ -36,17 +36,24 @@ class NewsAdminController(
         }
     }
 
-    @Put("/")
-    suspend fun updateNews(
-        @Body newsDto: News): HttpResponse<String> {
+    @Put("/{id}")
+     fun updateNews(
+        @Body newsDto: CreateNewsDto,
+        id: UUID
+        ): HttpResponse<String> {
         try {
             runBlocking {
-                newsRepository.update(newsDto)
+                val news = newsRepository.findById(id)
+
+                news?.body = newsDto.body
+                news?.title = newsDto.title
+
+                newsRepository.update(news as News)
             }
-            return HttpResponse.ok(newsDto.id.toString())
+            return HttpResponse.ok("updated $newsDto.id.toString()")
         } catch (exception: Exception) {
-            LOG.error("Failed to update news \"$newsDto\"", exception)
-            return HttpResponse.serverError<String>()
+            LOG.error("Failed to update news \"$newsDto.id\"", exception)
+            return HttpResponse.serverError()
         }
 
     }

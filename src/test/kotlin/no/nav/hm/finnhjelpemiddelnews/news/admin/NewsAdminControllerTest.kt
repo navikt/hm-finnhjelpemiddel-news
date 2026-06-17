@@ -37,7 +37,7 @@ class NewsAdminControllerTest (
             responseNewsDto.status shouldBe HttpStatus.OK
             responseNewsDto.body().body shouldBe newsDto.body
 
-            newsRepository.deleteById(newsDto.id)
+            newsAdminController.deleteNews(newsDto.id)
             val res = newsController.getNewsById(newsDto.id)
             res.status shouldBe HttpStatus.NOT_FOUND
         }
