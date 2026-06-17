@@ -52,13 +52,14 @@ class NewsAdminControllerTest (
     @Test
     fun putTest() {
         runBlocking {
-            val updatedNews = newsDto.copy(body = "Dette er oppdatering")
-            val response = newsAdminController.updateNews(updatedNews)
+            val updatedNews = CreateNewsDto(title = "Nyhet oppdatering", body = "Dette er en oppdatering")
+            val response = newsAdminController.updateNews(updatedNews, newsDto.id)
             response.status shouldBe HttpStatus.OK
 
             val fetched = newsController.getNewsById(newsDto.id)
             fetched.status shouldBe HttpStatus.OK
-            fetched.body().body shouldBe "Dette er oppdatering"
+            fetched.body().body shouldBe "Dette er en oppdatering"
+            fetched.body().title shouldBe "Nyhet oppdatering"
         }
     }
 }
