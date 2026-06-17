@@ -23,7 +23,7 @@ class NewsAdminController(
     }
 
     @Post("/")
-    suspend fun createNews(
+     fun createNews(
         @Body createNewsDto: CreateNewsDto) {
         try {
             val news = runBlocking {
@@ -51,18 +51,18 @@ class NewsAdminController(
 
     }
 
-    @Delete("/id/{id}")
-    suspend fun deleteNews(
-        id: String
+    @Delete("/{id}")
+    fun deleteNews(
+        id: UUID
     ): HttpResponse<String> {
         try {
             runBlocking {
-                newsRepository.deleteById(UUID.fromString(id))
+                newsRepository.deleteById(id)
             }
-            return HttpResponse.ok(id)
+            return HttpResponse.ok("deleted $id")
         } catch (exception: Exception) {
             LOG.error("Failed to delete news \"$id\"", exception)
-            return HttpResponse.serverError<String>()
+            return HttpResponse.serverError()
         }
     }
 }

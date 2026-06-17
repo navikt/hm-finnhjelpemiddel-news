@@ -30,7 +30,7 @@ class NewsController(
 
 
     //todo fiks dis shit
-    @Post("/ids")
+    // TODO: Instead of posting a defined list for getting a list of news, we should try to return either all or filter.
     fun getNewsList( @Body news: List<UUID>): HttpResponse<*> = try {
         HttpResponse.ok(news.mapNotNull { runBlocking { newsRepository.findById(it)} })
     } catch (exception: Exception) {

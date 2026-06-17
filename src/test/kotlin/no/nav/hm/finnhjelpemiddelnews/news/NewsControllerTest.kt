@@ -13,15 +13,9 @@ import java.util.UUID
 class NewsControllerTest (
     private val newsController: NewsController,
     private val newsRepository: NewsRepository,
-    private val objectMapper: ObjectMapper
 ) {
     @Test
     fun `Happy path`() {
-        @Language("JSON") val data = """
-            {
-            "description": "Dette er en nyhet"
-            }
-        """.trimIndent()
         val newsDto = News(title = "Nyhet 1", body = "Dette er en nyhet")
 
         runBlocking {
