@@ -6,6 +6,8 @@ import io.micronaut.http.annotation.Controller
 import io.micronaut.http.annotation.Get
 import io.micronaut.http.annotation.Post
 import io.swagger.v3.oas.annotations.tags.Tag
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import java.util.UUID
 import org.slf4j.LoggerFactory
@@ -27,14 +29,11 @@ class NewsController(
          HttpResponse.notFound()
     }
 
-
-
-    //todo fiks dis shit
-    // TODO: Instead of posting a defined list for getting a list of news, we should try to return either all or filter.
-    fun getNewsList( @Body news: List<UUID>): HttpResponse<*> = try {
-        HttpResponse.ok(news.mapNotNull { runBlocking { newsRepository.findById(it)} })
+    @Get
+    suspend fun getNewsList(): HttpResponse<List<NewsDto>> = try {
+        newsRepository.findAll().map{it.toDto()}.toList().let { HttpResponse.ok(it) }
     } catch (exception: Exception) {
-        LOG.error("Error when getting news $news", exception)
-        HttpResponse.serverError(exception.message)
+        LOG.error("Feil ved henting av news", exception)
+        HttpResponse.notFound()
     }
 }
