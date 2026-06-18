@@ -48,6 +48,7 @@ spec:
   accessPolicy:
     inbound:
       rules:
+        - application: hm-newsadmin
         - application: hm-oversikt-frontend
         - application: azure-token-generator
           namespace: nais
