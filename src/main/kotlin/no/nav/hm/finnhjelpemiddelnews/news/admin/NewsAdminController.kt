@@ -11,6 +11,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.hm.finnhjelpemiddelnews.news.CreateNewsDto
 import no.nav.hm.finnhjelpemiddelnews.news.News
 import no.nav.hm.finnhjelpemiddelnews.news.NewsRepository
+import java.time.LocalDateTime
 import java.util.UUID
 
 @Controller("/admin/news")
@@ -28,7 +29,9 @@ class NewsAdminController(
         return try {
             if (createNewsDto.title.isBlank()) return HttpResponse.badRequest()
             val news = runBlocking {
-                newsRepository.save(News(title = createNewsDto.title, description = createNewsDto.description, body = createNewsDto.body))
+                newsRepository.save(News(title = createNewsDto.title,
+                    description = createNewsDto.description, body = createNewsDto.body,
+                    created = LocalDateTime.now(),))
             }
             HttpResponse.ok(news.id)
         } catch (exception: Exception) {
@@ -46,7 +49,8 @@ class NewsAdminController(
             runBlocking {
                 val news = newsRepository.findById(id)
                 if(news != null) {
-                  val updatedNews = news.copy(title = newsDto.title, description = newsDto.description, body = newsDto.body)
+                  val updatedNews = news.copy(title = newsDto.title, description = newsDto.description, body = newsDto.body,
+                      created = LocalDateTime.now())
                   newsRepository.update(updatedNews)
                 } else throw Exception("Failed to find news by id $id")
             }

@@ -24,6 +24,7 @@ data class CreateNewsDto(
     val title: String,
     val description: String?,
     val body: String,
+    val created: LocalDateTime,
 )
 
 @Serdeable
@@ -33,4 +34,5 @@ data class NewsDto(
     val title: String,
     val description: String?,
     val body: String,
+    val created: LocalDateTime = LocalDateTime.now(),
 )

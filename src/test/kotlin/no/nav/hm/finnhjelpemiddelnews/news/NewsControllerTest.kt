@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test
 import kotlinx.coroutines.runBlocking
 import io.kotest.matchers.shouldBe
 import io.micronaut.http.HttpStatus
+import java.time.LocalDateTime
 import java.util.UUID
 
 @MicronautTest
@@ -12,9 +13,9 @@ class NewsControllerTest (
     private val newsController: NewsController,
     private val newsRepository: NewsRepository,
 ) {
-    val newsDto = News(title = "Nyhet 1", description = "", body = "Dette er en nyhet")
-    val newsDto2 = News(title = "Nyhet 2", description = "", body = "Dette er en nyhet")
-    val newsDto3 = News(title = "Nyhet 3", description = "", body = "Dette er en nyhet")
+    val newsDto = News(title = "Nyhet 1", description = "", body = "Dette er en nyhet", created = LocalDateTime.now())
+    val newsDto2 = News(title = "Nyhet 2", description = "", body = "Dette er en nyhet", created = LocalDateTime.now())
+    val newsDto3 = News(title = "Nyhet 3", description = "", body = "Dette er en nyhet", created = LocalDateTime.now())
 
 
     @Test
