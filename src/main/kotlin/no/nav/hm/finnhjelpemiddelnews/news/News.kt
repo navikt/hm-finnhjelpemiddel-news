@@ -15,9 +15,9 @@ data class News(
     val title: String,
     val description: String?,
     val body: String,
-    val created: LocalDateTime = LocalDateTime.now(),
-    val updated: LocalDateTime = LocalDateTime.now()
-) {fun toDto(): NewsDto {return NewsDto(id=id, title=title, description=description, body=body)}}
+    val created: LocalDateTime,
+    val updated: LocalDateTime
+) {fun toDto(): NewsDto {return NewsDto(id=id, title=title, description=description, body=body, created=created)}}
 
 @Serdeable
 data class CreateNewsDto(
@@ -34,5 +34,5 @@ data class NewsDto(
     val title: String,
     val description: String?,
     val body: String,
-    val created: LocalDateTime = LocalDateTime.now(),
+    val created: LocalDateTime,
 )

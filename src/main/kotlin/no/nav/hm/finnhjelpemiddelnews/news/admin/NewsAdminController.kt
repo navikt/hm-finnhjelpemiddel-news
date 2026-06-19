@@ -31,7 +31,7 @@ class NewsAdminController(
             val news = runBlocking {
                 newsRepository.save(News(title = createNewsDto.title,
                     description = createNewsDto.description, body = createNewsDto.body,
-                    created = LocalDateTime.now(),))
+                    created = LocalDateTime.now(), updated = LocalDateTime.now()))
             }
             HttpResponse.ok(news.id)
         } catch (exception: Exception) {
