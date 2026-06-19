@@ -1,7 +1,6 @@
 CREATE TABLE IF NOT EXISTS news (
     id UUID NOT NULL PRIMARY KEY,
     title VARCHAR(255) NOT NULL CHECK (title <> ''),
-    description VARCHAR(255),
     body TEXT,
     updated TIMESTAMP,
     created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
