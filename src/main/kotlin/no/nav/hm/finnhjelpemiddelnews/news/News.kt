@@ -16,7 +16,7 @@ data class News(
     val description: String?,
     val body: String,
     val created: LocalDateTime,
-    val updated: LocalDateTime
+    val updated: LocalDateTime = LocalDateTime.now()
 ) {fun toDto(): NewsDto {return NewsDto(id=id, title=title, description=description, body=body, created=created)}}
 
 @Serdeable
