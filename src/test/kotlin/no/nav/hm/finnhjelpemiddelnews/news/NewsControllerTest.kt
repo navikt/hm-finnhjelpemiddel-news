@@ -12,9 +12,9 @@ class NewsControllerTest (
     private val newsController: NewsController,
     private val newsRepository: NewsRepository,
 ) {
-    val newsDto = News(title = "Nyhet 1", body = "Dette er en nyhet")
-    val newsDto2 = News(title = "Nyhet 2", body = "Dette er en nyhet")
-    val newsDto3 = News(title = "Nyhet 3", body = "Dette er en nyhet")
+    val newsDto = News(title = "Nyhet 1", description = "", body = "Dette er en nyhet")
+    val newsDto2 = News(title = "Nyhet 2", description = "", body = "Dette er en nyhet")
+    val newsDto3 = News(title = "Nyhet 3", description = "", body = "Dette er en nyhet")
 
 
     @Test

@@ -13,14 +13,16 @@ data class News(
     @field:Id
     val id: UUID = UUID.randomUUID(),
     val title: String,
+    val description: String,
     val body: String,
     val created: LocalDateTime = LocalDateTime.now(),
     val updated: LocalDateTime = LocalDateTime.now()
-) {fun toDto(): NewsDto {return NewsDto(id=id, title=title, body=body)}}
+) {fun toDto(): NewsDto {return NewsDto(id=id, title=title, description=description, body=body)}}
 
 @Serdeable
 data class CreateNewsDto(
     val title: String,
+    val description: String,
     val body: String,
 )
 
@@ -29,5 +31,6 @@ data class CreateNewsDto(
 data class NewsDto(
     val id: UUID? = UUID.randomUUID(),
     val title: String,
+    val description: String,
     val body: String,
 )

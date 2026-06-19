@@ -1,14 +1,11 @@
 package no.nav.hm.finnhjelpemiddelnews.news
 
 import io.micronaut.http.HttpResponse
-import io.micronaut.http.annotation.Body
 import io.micronaut.http.annotation.Controller
 import io.micronaut.http.annotation.Get
-import io.micronaut.http.annotation.Post
 import io.swagger.v3.oas.annotations.tags.Tag
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.runBlocking
 import java.util.UUID
 import org.slf4j.LoggerFactory
 
@@ -29,7 +26,7 @@ class NewsController(
          HttpResponse.notFound()
     }
 
-    @Get
+    @Get("/")
     suspend fun getNewsList(): HttpResponse<List<NewsDto>> = try {
         newsRepository.findAll().map{it.toDto()}.toList().let { HttpResponse.ok(it) }
     } catch (exception: Exception) {
