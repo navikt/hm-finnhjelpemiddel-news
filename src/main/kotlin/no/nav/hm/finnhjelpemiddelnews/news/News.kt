@@ -13,7 +13,7 @@ data class News(
     @field:Id
     val id: UUID = UUID.randomUUID(),
     val title: String,
-    val description: String,
+    val description: String?,
     val body: String,
     val created: LocalDateTime = LocalDateTime.now(),
     val updated: LocalDateTime = LocalDateTime.now()
@@ -22,7 +22,7 @@ data class News(
 @Serdeable
 data class CreateNewsDto(
     val title: String,
-    val description: String,
+    val description: String?,
     val body: String,
 )
 
@@ -31,6 +31,6 @@ data class CreateNewsDto(
 data class NewsDto(
     val id: UUID? = UUID.randomUUID(),
     val title: String,
-    val description: String,
+    val description: String?,
     val body: String,
 )
