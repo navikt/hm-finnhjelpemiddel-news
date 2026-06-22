@@ -31,7 +31,7 @@ class NewsAdminController(
             val news = runBlocking {
                 newsRepository.save(News(title = createNewsDto.title,
                     description = createNewsDto.description, body = createNewsDto.body,
-                    created = LocalDateTime.now()))
+                    created = LocalDateTime.now(), publishedFrom = createNewsDto.publishedFrom, publishedTo = createNewsDto.publishedTo))
             }
             HttpResponse.ok(news.id)
         } catch (exception: Exception) {
@@ -50,7 +50,7 @@ class NewsAdminController(
                 val news = newsRepository.findById(id)
                 if(news != null) {
                   val updatedNews = news.copy(title = newsDto.title, description = newsDto.description, body = newsDto.body,
-                      created = LocalDateTime.now())
+                      created = LocalDateTime.now(), publishedFrom = news.publishedFrom, publishedTo = news.publishedTo)
                   newsRepository.update(updatedNews)
                 } else throw Exception("Failed to find news by id $id")
             }
