@@ -19,8 +19,8 @@ data class News(
     val updated: LocalDateTime = LocalDateTime.now(),
     val publishedFrom: LocalDateTime,
     val publishedTo: LocalDateTime,
-    val imageUrl: String?
-) {fun toDto(): NewsDto {return NewsDto(id=id, title=title, description=description, body=body, created=created, updated=updated, publishedFrom=publishedFrom, publishedTo=publishedTo, imageUrl=imageUrl)}}
+    val image_url: String?
+) {fun toDto(): NewsDto {return NewsDto(id=id, title=title, description=description, body=body, created=created, updated=updated, publishedFrom=publishedFrom, publishedTo=publishedTo, image_url=image_url)}}
 
 @Serdeable
 data class CreateNewsDto(
@@ -29,7 +29,7 @@ data class CreateNewsDto(
     val body: String,
     val publishedFrom: LocalDateTime,
     val publishedTo: LocalDateTime,
-    val imageUrl: String?
+    val image_url: String?
 )
 
 @Serdeable
@@ -43,5 +43,5 @@ data class NewsDto(
     val updated: LocalDateTime,
     val publishedFrom: LocalDateTime,
     val publishedTo: LocalDateTime,
-    val imageUrl: String?
+    val image_url: String?
 )

@@ -32,7 +32,7 @@ class NewsAdminController(
                 newsRepository.save(News(title = createNewsDto.title,
                     description = createNewsDto.description, body = createNewsDto.body,
                     created = LocalDateTime.now(), publishedFrom = createNewsDto.publishedFrom,
-                    publishedTo = createNewsDto.publishedTo, imageUrl = createNewsDto.imageUrl))
+                    publishedTo = createNewsDto.publishedTo, image_url = createNewsDto.image_url))
             }
             HttpResponse.ok(news.id)
         } catch (exception: Exception) {
@@ -51,7 +51,7 @@ class NewsAdminController(
                 val news = newsRepository.findById(id)
                 if(news != null) {
                   val updatedNews = news.copy(title = newsDto.title, description = newsDto.description, body = newsDto.body,
-                      updated = LocalDateTime.now(), publishedFrom = news.publishedFrom, publishedTo = news.publishedTo, imageUrl = news.imageUrl)
+                      updated = LocalDateTime.now(), publishedFrom = news.publishedFrom, publishedTo = news.publishedTo, image_url = news.image_url)
                   newsRepository.update(updatedNews)
                 } else throw Exception("Failed to find news by id $id")
             }
