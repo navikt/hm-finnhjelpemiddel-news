@@ -1,0 +1,2 @@
+ALTER TABLE news
+ADD image_url VARCHAR(2048);

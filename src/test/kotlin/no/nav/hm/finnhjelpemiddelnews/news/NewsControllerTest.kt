@@ -13,9 +13,9 @@ class NewsControllerTest (
     private val newsController: NewsController,
     private val newsRepository: NewsRepository,
 ) {
-    val newsDto = News(title = "Nyhet 1", description = "", body = "Dette er en nyhet", created = LocalDateTime.now(), publishedFrom = LocalDateTime.now(), publishedTo = LocalDateTime.now())
-    val newsDto2 = News(title = "Nyhet 2", description = "", body = "Dette er en nyhet", created = LocalDateTime.now(), publishedFrom = LocalDateTime.now(), publishedTo = LocalDateTime.now())
-    val newsDto3 = News(title = "Nyhet 3", description = "", body = "Dette er en nyhet", created = LocalDateTime.now(), publishedFrom = LocalDateTime.now(), publishedTo = LocalDateTime.now())
+    val newsDto = News(title = "Nyhet 1", description = "", body = "Dette er en nyhet", created = LocalDateTime.now(), publishedFrom = LocalDateTime.now(), publishedTo = LocalDateTime.now(), imageUrl = null)
+    val newsDto2 = News(title = "Nyhet 2", description = "", body = "Dette er en nyhet", created = LocalDateTime.now(), publishedFrom = LocalDateTime.now(), publishedTo = LocalDateTime.now(), imageUrl = null)
+    val newsDto3 = News(title = "Nyhet 3", description = "", body = "Dette er en nyhet", created = LocalDateTime.now(), publishedFrom = LocalDateTime.now(), publishedTo = LocalDateTime.now(), imageUrl = null)
 
 
     @Test
