@@ -3,6 +3,7 @@ package no.nav.hm.finnhjelpemiddelnews.news
 import io.micronaut.http.HttpResponse
 import io.micronaut.http.annotation.Controller
 import io.micronaut.http.annotation.Get
+import io.micronaut.http.annotation.QueryValue
 import io.swagger.v3.oas.annotations.tags.Tag
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
@@ -33,4 +34,14 @@ class NewsController(
         LOG.error("Feil ved henting av news", exception)
         HttpResponse.notFound()
     }
+
+    @Get("/list")
+    suspend fun getNewsBySize(@QueryValue(defaultValue = "5") size: Int): HttpResponse<List<NewsDto>> = try {
+        newsRepository.findAll().map{it.toDto()}.toList().take(size).let { HttpResponse.ok(it) }
+    } catch (exception: Exception) {
+        LOG.error("Feil ved henting av news", exception)
+        HttpResponse.notFound()
+    }
+
+
 }
