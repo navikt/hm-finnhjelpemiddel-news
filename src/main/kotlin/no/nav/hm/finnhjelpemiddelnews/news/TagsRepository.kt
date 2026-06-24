@@ -7,6 +7,5 @@ import java.util.UUID
 
 @JdbcRepository(dialect = Dialect.POSTGRES)
 interface TagsRepository : CoroutineCrudRepository<Tags, UUID> {
-    fun findTag(tagId: UUID): List<String>
-    fun deleteTag(tagId: UUID)
+    fun findTag(id: UUID): List<String>
 }

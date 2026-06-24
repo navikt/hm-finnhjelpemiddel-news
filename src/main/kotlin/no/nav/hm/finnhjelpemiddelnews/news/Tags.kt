@@ -7,7 +7,7 @@ import io.micronaut.serde.annotation.Serdeable
 import java.util.UUID
 
 @Serdeable
-@MappedEntity("newsTags")
+@MappedEntity("tags")
 data class Tags(
     @field:Id
     val id: UUID = UUID.randomUUID(),
