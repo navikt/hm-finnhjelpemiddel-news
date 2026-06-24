@@ -13,15 +13,18 @@ import org.slf4j.LoggerFactory
 @Controller("/news")
 @Tag(name = "News")
 class NewsController(
-    private val newsRepository: NewsRepository
+    private val newsRepository: NewsRepository,
+    private val tagsRepository: TagsRepository
 ) {
     companion object {
         private val LOG = LoggerFactory.getLogger(NewsController::class.java)
     }
 
     @Get("/{id}")
-     fun getNewsById(id: UUID): HttpResponse<NewsDto> = try {
-        newsRepository.findOne(id).let { HttpResponse.ok(it) }
+    suspend fun getNewsById(id: UUID): HttpResponse<NewsDto> = try {
+        val dto = newsRepository.findOne(id)
+        val tags = tagsRepository.findTag(id)
+        HttpResponse.ok(dto.copy(tags = tags))
     } catch (exception: Exception) {
         LOG.error("Feil ved henting av news", exception)
          HttpResponse.notFound()
@@ -29,7 +32,10 @@ class NewsController(
 
     @Get("/")
     suspend fun getNewsList(): HttpResponse<List<NewsDto>> = try {
-        newsRepository.findAll().map{it.toDto()}.toList().let { HttpResponse.ok(it) }
+        newsRepository.findAll().map { news ->
+            val tags = tagsRepository.findTag(news.id)
+            news.toDto(tags)
+        }.toList().let { HttpResponse.ok(it) }
     } catch (exception: Exception) {
         LOG.error("Feil ved henting av news", exception)
         HttpResponse.notFound()
@@ -37,7 +43,10 @@ class NewsController(
 
     @Get("/list")
     suspend fun getNewsBySize(@QueryValue(defaultValue = "5") size: Int): HttpResponse<List<NewsDto>> = try {
-        newsRepository.findAll().map{it.toDto()}.toList().take(size).let { HttpResponse.ok(it) }
+        newsRepository.findAll().map { news ->
+            val tags = tagsRepository.findTag(news.id)
+            news.toDto(tags)
+        }.toList().take(size).let { HttpResponse.ok(it) }
     } catch (exception: Exception) {
         LOG.error("Feil ved henting av news", exception)
         HttpResponse.notFound()

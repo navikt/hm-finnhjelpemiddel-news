@@ -11,12 +11,13 @@ import kotlinx.coroutines.runBlocking
 import no.nav.hm.finnhjelpemiddelnews.news.CreateNewsDto
 import no.nav.hm.finnhjelpemiddelnews.news.News
 import no.nav.hm.finnhjelpemiddelnews.news.NewsRepository
+import no.nav.hm.finnhjelpemiddelnews.news.TagsRepository
 import java.time.LocalDateTime
 import java.util.UUID
 
 @Controller("/admin/news")
 class NewsAdminController(
-    private val newsRepository: NewsRepository
+    private val newsRepository: NewsRepository,
 ) {
 
     companion object {
@@ -29,10 +30,17 @@ class NewsAdminController(
         return try {
             if (createNewsDto.title.isBlank()) return HttpResponse.badRequest()
             val news = runBlocking {
-                newsRepository.save(News(title = createNewsDto.title,
-                    description = createNewsDto.description, body = createNewsDto.body,
-                    created = LocalDateTime.now(), publishedFrom = createNewsDto.publishedFrom,
-                    publishedTo = createNewsDto.publishedTo, image_url = createNewsDto.image_url))
+                val saved = newsRepository.save(News(
+                    title = createNewsDto.title,
+                    description = createNewsDto.description,
+                    body = createNewsDto.body,
+                    created = LocalDateTime.now(),
+                    publishedFrom = createNewsDto.publishedFrom,
+                    publishedTo = createNewsDto.publishedTo,
+                    image_url = createNewsDto.image_url,
+                    tags = createNewsDto.tags
+                ))
+                saved
             }
             HttpResponse.ok(news.id)
         } catch (exception: Exception) {
@@ -50,14 +58,22 @@ class NewsAdminController(
             runBlocking {
                 val news = newsRepository.findById(id)
                 if(news != null) {
-                  val updatedNews = news.copy(title = newsDto.title, description = newsDto.description, body = newsDto.body,
-                      updated = LocalDateTime.now(), publishedFrom = news.publishedFrom, publishedTo = news.publishedTo, image_url = news.image_url)
+                  val updatedNews = news.copy(
+                      title = newsDto.title,
+                      description = newsDto.description,
+                      body = newsDto.body,
+                      updated = LocalDateTime.now(),
+                      publishedFrom = newsDto.publishedFrom,
+                      publishedTo = newsDto.publishedTo,
+                      image_url = newsDto.image_url,
+                      tags = newsDto.tags
+                  )
                   newsRepository.update(updatedNews)
                 } else throw Exception("Failed to find news by id $id")
             }
-            return HttpResponse.ok("updated $newsDto.id.toString()")
+            return HttpResponse.ok("updated $id")
         } catch (exception: Exception) {
-            LOG.error("Failed to update news \"$newsDto.id\"", exception)
+            LOG.error("Failed to update news \"$id\"", exception)
             return HttpResponse.serverError()
         }
 
