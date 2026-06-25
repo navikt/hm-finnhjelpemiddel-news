@@ -7,6 +7,7 @@ import io.micronaut.http.annotation.Controller
 import io.micronaut.http.annotation.Delete
 import io.micronaut.http.annotation.Post
 import io.micronaut.http.annotation.Put
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import no.nav.hm.finnhjelpemiddelnews.news.CreateNewsDto
 import no.nav.hm.finnhjelpemiddelnews.news.News
@@ -14,7 +15,6 @@ import no.nav.hm.finnhjelpemiddelnews.news.NewsRepository
 import no.nav.hm.finnhjelpemiddelnews.news.NewsTags
 import no.nav.hm.finnhjelpemiddelnews.news.NewsTagsId
 import no.nav.hm.finnhjelpemiddelnews.news.NewsTagsRepository
-import no.nav.hm.finnhjelpemiddelnews.news.TagsRepository
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -43,7 +43,12 @@ class NewsAdminController(
                     publishedTo = createNewsDto.publishedTo,
                     image_url = createNewsDto.image_url,
                 ))
+                val tagLinks = createNewsDto.tags.map { tagId ->
+                    NewsTags(NewsTagsId(tagId = UUID.fromString(tagId), newsId = saved.id))
+                }
+                newsTagsRepository.saveAll(tagLinks).toList()
                 saved
+
             }
             HttpResponse.ok(news.id)
         } catch (exception: Exception) {
