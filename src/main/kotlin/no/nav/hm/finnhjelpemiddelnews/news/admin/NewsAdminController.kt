@@ -75,6 +75,11 @@ class NewsAdminController(
                       publishedTo = newsDto.publishedTo,
                       image_url = newsDto.image_url,
                   )
+                    newsTagsRepository.deleteByIdNewsId(updatedNews.id)
+                    val tagLinks = newsDto.tags.map { tagId ->
+                        NewsTags(NewsTagsId(tagId = UUID.fromString(tagId), newsId = updatedNews.id))
+                    }
+                    if (tagLinks.isNotEmpty()) newsTagsRepository.saveAll(tagLinks).toList()
                   newsRepository.update(updatedNews)
                 } else throw Exception("Failed to find news by id $id")
             }
