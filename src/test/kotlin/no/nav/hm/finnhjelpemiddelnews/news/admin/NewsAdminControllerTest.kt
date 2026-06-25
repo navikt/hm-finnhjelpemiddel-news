@@ -19,7 +19,7 @@ class NewsAdminControllerTest (
     private val newsAdminController: NewsAdminController)
 {
     val newsDto = News(title = "Nyhet 1", description = "Deez nuts", body = "Dette er en nyhet", created = LocalDateTime.now(),
-        publishedFrom = LocalDateTime.now(), publishedTo = LocalDateTime.now(), image_url = null, tags=emptyList())
+        publishedFrom = LocalDateTime.now(), publishedTo = LocalDateTime.now(), image_url = null)
 
     @BeforeEach
     fun init() = runBlocking {

@@ -12,7 +12,7 @@ data class Tags(
     @field:Id
     val id: UUID = UUID.randomUUID(),
     val tag: String
-) {fun toDto(): TagDto {return TagDto(id=id, tag=tag)}}
+) { fun toDto(): TagDto = TagDto(id = id, tag = tag) }
 
 @Serdeable
 data class CreateTagDto(

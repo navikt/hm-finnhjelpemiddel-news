@@ -1,6 +1,6 @@
-CREATE TABLE IF NOT EXISTS newsTags (
+CREATE TABLE IF NOT EXISTS tags (
     id UUID NOT NULL PRIMARY KEY,
-    tag VARCHAR(20) NOT NULL CHECK (tag <> '')
+    tag VARCHAR(20) NOT NULL UNIQUE CHECK (tag <> '')
     );
 
 

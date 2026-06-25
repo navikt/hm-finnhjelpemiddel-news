@@ -7,6 +7,6 @@ import java.util.UUID
 
 @JdbcRepository(dialect = Dialect.POSTGRES)
 interface NewsRepository : CoroutineCrudRepository<News, UUID> {
-    fun findOne(id: UUID): NewsDto
-    fun findByTitle(title: String): NewsDto
+    suspend fun findOne(id: UUID): News
+    suspend fun findByTitle(title: String): News
 }

@@ -12,6 +12,9 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import no.nav.hm.finnhjelpemiddelnews.news.CreateTagDto
+import no.nav.hm.finnhjelpemiddelnews.news.NewsTags
+import no.nav.hm.finnhjelpemiddelnews.news.NewsTagsId
+import no.nav.hm.finnhjelpemiddelnews.news.NewsTagsRepository
 import no.nav.hm.finnhjelpemiddelnews.news.TagDto
 import no.nav.hm.finnhjelpemiddelnews.news.Tags
 import no.nav.hm.finnhjelpemiddelnews.news.TagsRepository
@@ -20,6 +23,7 @@ import java.util.UUID
 @Controller("/admin/tags")
 class TagsAdminController(
     private val tagsRepository: TagsRepository,
+    private val newsTagsRepository: NewsTagsRepository,
 ) {
 
     companion object {
@@ -33,14 +37,33 @@ class TagsAdminController(
         return try {
             if (createTagDto.tag.isBlank()) return HttpResponse.badRequest()
             val tag = runBlocking {
-                val saved = tagsRepository.save(Tags(
-                    tag = createTagDto.tag,
-                ))
-                saved
+                tagsRepository.save(Tags(tag = createTagDto.tag))
             }
             HttpResponse.ok(tag.id)
         } catch (exception: Exception) {
             LOG.error("Failed to create new tag \"$createTagDto\"", exception)
+            HttpResponse.serverError()
+        }
+    }
+
+    @Post("/{tagId}/news/{newsId}")
+    fun linkTagToNews(tagId: UUID, newsId: UUID): HttpResponse<String> {
+        return try {
+            runBlocking { newsTagsRepository.save(NewsTags(NewsTagsId(tagId = tagId, newsId = newsId))) }
+            HttpResponse.ok("linked tag $tagId to news $newsId")
+        } catch (exception: Exception) {
+            LOG.error("Failed to link tag $tagId to news $newsId", exception)
+            HttpResponse.serverError()
+        }
+    }
+
+    @Delete("/{tagId}/news/{newsId}")
+    fun unlinkTagFromNews(tagId: UUID, newsId: UUID): HttpResponse<String> {
+        return try {
+            runBlocking { newsTagsRepository.deleteById(NewsTagsId(tagId = tagId, newsId = newsId)) }
+            HttpResponse.ok("unlinked tag $tagId from news $newsId")
+        } catch (exception: Exception) {
+            LOG.error("Failed to unlink tag $tagId from news $newsId", exception)
             HttpResponse.serverError()
         }
     }
@@ -53,11 +76,8 @@ class TagsAdminController(
         try {
             runBlocking {
                 val tag = tagsRepository.findById(id)
-                if(tag != null) {
-                    val updatedTag = tag.copy(
-                        tag = tagDto.tag,
-                    )
-                    tagsRepository.update(updatedTag)
+                if (tag != null) {
+                    tagsRepository.update(tag.copy(tag = tagDto.tag))
                 } else throw Exception("Failed to find tag by id $id")
             }
             return HttpResponse.ok("updated $id")
@@ -65,13 +85,10 @@ class TagsAdminController(
             LOG.error("Failed to update tag \"$id\"", exception)
             return HttpResponse.serverError()
         }
-
     }
 
     @Delete("/{id}")
-    fun deleteTag(
-        id: UUID
-    ): HttpResponse<String> {
+    fun deleteTag(id: UUID): HttpResponse<String> {
         try {
             runBlocking {
                 if (!tagsRepository.existsById(id)) return@runBlocking HttpResponse.badRequest<String>()
@@ -84,12 +101,13 @@ class TagsAdminController(
         }
     }
 
-    @Get("/{id}")
-    suspend fun getTagsById(id: UUID): HttpResponse<List<String>> = try {
-        val tags = tagsRepository.findTag(id)
+    @Get("/news/{newsId}")
+    suspend fun getTagsByNewsId(newsId: UUID): HttpResponse<List<String>> = try {
+        val tagIds = newsTagsRepository.findByIdNewsId(newsId).map { it.id.tagId }
+        val tags = if (tagIds.isEmpty()) emptyList() else tagsRepository.findByIdIn(tagIds).map { it.tag }
         HttpResponse.ok(tags)
     } catch (exception: Exception) {
-        LOG.error("Feil ved henting av tags", exception)
+        LOG.error("Feil ved henting av tags for news $newsId", exception)
         HttpResponse.notFound()
     }
 
@@ -100,5 +118,4 @@ class TagsAdminController(
         LOG.error("Feil ved henting av tags", exception)
         HttpResponse.notFound()
     }
-
 }

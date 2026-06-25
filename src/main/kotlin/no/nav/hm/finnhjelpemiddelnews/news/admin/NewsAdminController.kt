@@ -11,6 +11,9 @@ import kotlinx.coroutines.runBlocking
 import no.nav.hm.finnhjelpemiddelnews.news.CreateNewsDto
 import no.nav.hm.finnhjelpemiddelnews.news.News
 import no.nav.hm.finnhjelpemiddelnews.news.NewsRepository
+import no.nav.hm.finnhjelpemiddelnews.news.NewsTags
+import no.nav.hm.finnhjelpemiddelnews.news.NewsTagsId
+import no.nav.hm.finnhjelpemiddelnews.news.NewsTagsRepository
 import no.nav.hm.finnhjelpemiddelnews.news.TagsRepository
 import java.time.LocalDateTime
 import java.util.UUID
@@ -18,6 +21,7 @@ import java.util.UUID
 @Controller("/admin/news")
 class NewsAdminController(
     private val newsRepository: NewsRepository,
+    private val newsTagsRepository: NewsTagsRepository,
 ) {
 
     companion object {
@@ -38,7 +42,6 @@ class NewsAdminController(
                     publishedFrom = createNewsDto.publishedFrom,
                     publishedTo = createNewsDto.publishedTo,
                     image_url = createNewsDto.image_url,
-                    tags = createNewsDto.tags
                 ))
                 saved
             }
@@ -66,7 +69,6 @@ class NewsAdminController(
                       publishedFrom = newsDto.publishedFrom,
                       publishedTo = newsDto.publishedTo,
                       image_url = newsDto.image_url,
-                      tags = newsDto.tags
                   )
                   newsRepository.update(updatedNews)
                 } else throw Exception("Failed to find news by id $id")
