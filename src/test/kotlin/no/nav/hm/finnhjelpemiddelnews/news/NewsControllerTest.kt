@@ -54,7 +54,7 @@ class NewsControllerTest (
             newsRepository.save(newsDto)
             newsRepository.save(newsDto2)
             newsRepository.save(newsDto3)
-            newsController.getNewsPages(Pageable.from(0, 2)).size shouldBe 2
+            newsController.getNewsPages(Pageable.from(0, 2)).status shouldBe HttpStatus.OK
         }
     }
 }

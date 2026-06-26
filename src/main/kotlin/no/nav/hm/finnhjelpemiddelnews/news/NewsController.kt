@@ -29,7 +29,7 @@ class NewsController(
         HttpResponse.ok(news.toDto(tags))
     } catch (exception: Exception) {
         LOG.error("Feil ved henting av news", exception)
-         HttpResponse.notFound()
+        HttpResponse.notFound()
     }
 
     @Get("/")
@@ -53,11 +53,15 @@ class NewsController(
     }
 
     @Get("/pagelist/")
-    suspend fun getNewsPages(pageable: Pageable): List<News>  {
+    suspend fun getNewsPages(pageable: Pageable): HttpResponse<List<NewsDto>> = try {
         val page = if (pageable.sort.isSorted) pageable
-            else Pageable.from(pageable.number, pageable.size)
-        return newsRepository.findAll(page).content
-    }
+        else Pageable.from(pageable.number, pageable.size)
+        newsRepository.findAll(page).map { news ->
+            news.toDto()}.content.let { HttpResponse.ok(it) }
+} catch (exception: Exception) {
+    LOG.error("Feil ved henting av news", exception)
+    HttpResponse.notFound()
+}
 
     private suspend fun fetchTagsForNews(newsId: UUID): List<String> {
         val tagIds = newsTagsRepository.findByIdNewsId(newsId).map { it.id.tagId }
