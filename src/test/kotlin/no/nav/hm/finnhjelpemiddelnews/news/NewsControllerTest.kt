@@ -4,6 +4,7 @@ import io.micronaut.test.extensions.junit5.annotation.MicronautTest
 import org.junit.jupiter.api.Test
 import kotlinx.coroutines.runBlocking
 import io.kotest.matchers.shouldBe
+import io.micronaut.data.model.Pageable
 import io.micronaut.http.HttpStatus
 import java.time.LocalDateTime
 import java.util.UUID
@@ -44,6 +45,16 @@ class NewsControllerTest (
     fun badGetNewsById() {
         runBlocking {
             newsController.getNewsById(UUID.randomUUID()).status shouldBe HttpStatus.NOT_FOUND
+        }
+    }
+
+    @Test
+    fun pagination() {
+        runBlocking {
+            newsRepository.save(newsDto)
+            newsRepository.save(newsDto2)
+            newsRepository.save(newsDto3)
+            newsController.getNewsPages(Pageable.from(0, 2)).size shouldBe 2
         }
     }
 }

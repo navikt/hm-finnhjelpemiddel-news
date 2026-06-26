@@ -1,5 +1,6 @@
 package no.nav.hm.finnhjelpemiddelnews.news
 
+import io.micronaut.data.model.Pageable
 import io.micronaut.http.HttpResponse
 import io.micronaut.http.annotation.Controller
 import io.micronaut.http.annotation.Get
@@ -49,6 +50,13 @@ class NewsController(
     } catch (exception: Exception) {
         LOG.error("Feil ved henting av news", exception)
         HttpResponse.notFound()
+    }
+
+    @Get("/pagelist/")
+    suspend fun getNewsPages(pageable: Pageable): List<News>  {
+        val page = if (pageable.sort.isSorted) pageable
+            else Pageable.from(pageable.number, pageable.size)
+        return newsRepository.findAll(page).content
     }
 
     private suspend fun fetchTagsForNews(newsId: UUID): List<String> {
