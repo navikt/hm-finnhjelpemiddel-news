@@ -1,6 +1,7 @@
 package no.nav.hm.finnhjelpemiddelnews.news.admin
 
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import io.micronaut.http.HttpStatus
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest
 import kotlinx.coroutines.runBlocking
@@ -65,6 +66,7 @@ class NewsAdminControllerTest (
             fetched.body().body shouldBe "Dette er en oppdatering"
             fetched.body().description shouldBe "oniichan"
             fetched.body().title shouldBe "Nyhet oppdatering"
+            fetched.body().updated shouldNotBe null
         }
     }
 
