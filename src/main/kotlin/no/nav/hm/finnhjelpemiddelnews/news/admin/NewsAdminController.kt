@@ -42,6 +42,7 @@ class NewsAdminController(
                     publishedFrom = createNewsDto.publishedFrom,
                     publishedTo = createNewsDto.publishedTo,
                     image_url = createNewsDto.image_url,
+                    imageDescription = createNewsDto.imageDescription,
                 ))
                 val tagLinks = createNewsDto.tags.map { tagId ->
                     NewsTags(NewsTagsId(tagId = UUID.fromString(tagId), newsId = saved.id))
@@ -74,6 +75,7 @@ class NewsAdminController(
                       publishedFrom = newsDto.publishedFrom,
                       publishedTo = newsDto.publishedTo,
                       image_url = newsDto.image_url,
+                      imageDescription = newsDto.imageDescription,
                   )
                     newsTagsRepository.deleteByIdNewsId(updatedNews.id)
                     val tagLinks = newsDto.tags.map { tagId ->
