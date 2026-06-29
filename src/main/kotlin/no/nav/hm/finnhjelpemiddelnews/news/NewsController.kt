@@ -1,6 +1,8 @@
 package no.nav.hm.finnhjelpemiddelnews.news
 
+import io.micronaut.data.model.Page
 import io.micronaut.data.model.Pageable
+import io.micronaut.data.model.Sort
 import io.micronaut.http.HttpResponse
 import io.micronaut.http.annotation.Controller
 import io.micronaut.http.annotation.Get
@@ -33,10 +35,11 @@ class NewsController(
     }
 
     @Get("/")
-    suspend fun getNewsList(): HttpResponse<List<NewsDto>> = try {
-        newsRepository.findAll().map { news ->
-            news.toDto(fetchTagsForNews(news.id))
-        }.toList().let { HttpResponse.ok(it) }
+    suspend fun getNewsList(@QueryValue(defaultValue = "0") page: Int,
+                            @QueryValue(defaultValue = "6") size: Int): HttpResponse<Page<NewsDto>> = try {
+        val sort = Sort.of(Sort.Order.desc("created"))
+        val pageable = Pageable.from(page, size, sort)
+        newsRepository.findAll(pageable).map { it.toDto() }.let { HttpResponse.ok(it) }
     } catch (exception: Exception) {
         LOG.error("Feil ved henting av news", exception)
         HttpResponse.notFound()
@@ -52,16 +55,6 @@ class NewsController(
         HttpResponse.notFound()
     }
 
-    @Get("/pagelist/")
-    suspend fun getNewsPages(pageable: Pageable): HttpResponse<List<NewsDto>> = try {
-        val page = if (pageable.sort.isSorted) pageable
-        else Pageable.from(pageable.number, pageable.size)
-        newsRepository.findAll(page).map { news ->
-            news.toDto()}.content.let { HttpResponse.ok(it) }
-} catch (exception: Exception) {
-    LOG.error("Feil ved henting av news", exception)
-    HttpResponse.notFound()
-}
 
     private suspend fun fetchTagsForNews(newsId: UUID): List<String> {
         val tagIds = newsTagsRepository.findByIdNewsId(newsId).map { it.id.tagId }

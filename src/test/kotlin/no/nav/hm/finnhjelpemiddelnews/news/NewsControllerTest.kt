@@ -37,7 +37,10 @@ class NewsControllerTest (
         runBlocking {
             newsRepository.save(newsDto2)
             newsRepository.save(newsDto3)
-            newsController.getNewsList()
+            val res = newsController.getNewsList(page = 0, size = 10)
+            res.status shouldBe HttpStatus.OK
+            res.body().content.size shouldBe 2
+
         }
     }
 
@@ -46,15 +49,4 @@ class NewsControllerTest (
         runBlocking {
             newsController.getNewsById(UUID.randomUUID()).status shouldBe HttpStatus.NOT_FOUND
         }
-    }
-
-    @Test
-    fun pagination() {
-        runBlocking {
-            newsRepository.save(newsDto)
-            newsRepository.save(newsDto2)
-            newsRepository.save(newsDto3)
-            newsController.getNewsPages(Pageable.from(0, 2)).status shouldBe HttpStatus.OK
-        }
-    }
-}
+    } }
