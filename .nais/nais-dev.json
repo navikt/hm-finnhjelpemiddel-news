@@ -7,5 +7,6 @@
   "disk_tier": "db-f1-micro",
   "disk_size": 10,
   "env": {
+    "MEDIA_UPLOAD_URL": "http://hm-grunndata-media"
   }
 }

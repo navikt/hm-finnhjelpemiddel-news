@@ -7,5 +7,6 @@
   "disk_tier": "db-custom-1-3840",
   "disk_size": 10,
   "env": {
+    "MEDIA_UPLOAD_URL": "http://hm-grunndata-media"
   }
 }

@@ -95,3 +95,7 @@ azure:
     type: client_credentials
   introspection:
     endpoint: ${NAIS_TOKEN_INTROSPECTION_ENDPOINT:`localhost`}
+
+media:
+  upload:
+    url: ${MEDIA_UPLOAD_URL:http://localhost:8080}

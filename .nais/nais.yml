@@ -53,6 +53,9 @@ spec:
         - application: azure-token-generator
           namespace: nais
           cluster: dev-gcp
+    outbound:
+      rules:
+        - application: hm-grunndata-media
   gcp:
     sqlInstances:
       - name: hm-finnhjelpemiddel-news-db

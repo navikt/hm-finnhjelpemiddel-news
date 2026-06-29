@@ -50,7 +50,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactive")
     implementation("org.apache.poi:poi:$poiVersion")
     implementation("org.apache.poi:poi-ooxml:$poiVersion")
-    compileOnly("io.micronaut:micronaut-http-client")
+    implementation("io.micronaut:micronaut-http-client")
     compileOnly("io.micronaut.openapi:micronaut-openapi-annotations")
     runtimeOnly("ch.qos.logback:logback-classic")
     runtimeOnly("org.yaml:snakeyaml")
