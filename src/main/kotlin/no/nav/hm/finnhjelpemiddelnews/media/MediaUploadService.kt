@@ -15,7 +15,7 @@ class MediaUploadService(private val mediaUploadClient: MediaUploadClient) {
 
     suspend fun uploadMedia(file: CompletedFileUpload, oid: UUID, objectType: ObjectType): MediaDTO {
         val type = getMediaType(file)
-        if (type == MediaType.OTHER) throw UknownMediaSource("only png, jpg, pdf is supported")
+        if (type == MediaType.OTHER) throw UnknownMediaSource("only png, jpg, pdf is supported")
         val body = MultipartBody.builder().addPart(
             "file", file.filename,
             io.micronaut.http.MediaType.MULTIPART_FORM_DATA_TYPE, file.bytes

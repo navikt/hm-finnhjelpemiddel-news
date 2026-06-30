@@ -21,4 +21,4 @@ data class MediaDTO(
 )
 
 enum class MediaType { IMAGE, PDF, OTHER }
-enum class MediaSourceType { EXTERNALURL, UPLOAD }
+enum class MediaSourceType { EXTERNALURL, UPLOAD, REGISTER }
