@@ -10,7 +10,7 @@ import io.micronaut.http.client.annotation.Client
 import io.micronaut.http.client.multipart.MultipartBody
 import java.util.*
 
-@Client("\${media.upload.url}/api/v1/upload/media/register")
+@Client("\${media.upload.url}/api/v1/upload/media/news")
 interface MediaUploadClient {
 
     @Post(
