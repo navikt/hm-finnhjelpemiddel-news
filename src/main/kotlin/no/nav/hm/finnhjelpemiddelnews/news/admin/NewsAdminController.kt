@@ -1,14 +1,21 @@
 package no.nav.hm.finnhjelpemiddelnews.news.admin
 
 import io.micronaut.http.HttpResponse
+import io.micronaut.http.MediaType.APPLICATION_JSON
+import io.micronaut.http.MediaType.MULTIPART_FORM_DATA
 import io.micronaut.http.annotation.Body
 import org.slf4j.LoggerFactory
 import io.micronaut.http.annotation.Controller
 import io.micronaut.http.annotation.Delete
+import io.micronaut.http.annotation.Get
 import io.micronaut.http.annotation.Post
 import io.micronaut.http.annotation.Put
+import io.micronaut.http.multipart.CompletedFileUpload
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
+import no.nav.hm.finnhjelpemiddelnews.media.MediaDTO
+import no.nav.hm.finnhjelpemiddelnews.media.MediaUploadService
+import no.nav.hm.finnhjelpemiddelnews.media.ObjectType
 import no.nav.hm.finnhjelpemiddelnews.news.CreateNewsDto
 import no.nav.hm.finnhjelpemiddelnews.news.News
 import no.nav.hm.finnhjelpemiddelnews.news.NewsRepository
@@ -22,6 +29,7 @@ import java.util.UUID
 class NewsAdminController(
     private val newsRepository: NewsRepository,
     private val newsTagsRepository: NewsTagsRepository,
+    private val mediaUploadService: MediaUploadService,
 ) {
 
     companion object {
@@ -107,5 +115,26 @@ class NewsAdminController(
             LOG.error("Failed to delete news \"$id\"", exception)
             return HttpResponse.serverError()
         }
+    }
+    @Post(
+        value = "/{newsId}/media",
+        consumes = [MULTIPART_FORM_DATA],
+        produces = [APPLICATION_JSON]
+    )
+    suspend fun uploadNewsImage(newsId: UUID, @Body file: CompletedFileUpload): HttpResponse<MediaDTO> {
+        val news = newsRepository.findById(newsId) ?: return HttpResponse.notFound()
+        val media = mediaUploadService.uploadMedia(file, newsId, ObjectType.UNKNOWN)
+        newsRepository.update(news.copy(image_url = media.uri))
+        return HttpResponse.created(media)
+    }
+
+    @Get("/media/{newsId}")
+    suspend fun getMediaList(newsId: UUID): HttpResponse<List<MediaDTO>> =
+        HttpResponse.ok(mediaUploadService.getMediaList(newsId))
+
+    @Delete("/media/{newsId}/{uri}")
+    suspend fun deleteMedia(newsId: UUID, uri: String): HttpResponse<MediaDTO> {
+        LOG.info("Deleting media for news $newsId, uri: $uri")
+        return HttpResponse.ok(mediaUploadService.deleteByOidAndUri(newsId, uri))
     }
 }
