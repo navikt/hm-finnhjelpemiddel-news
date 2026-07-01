@@ -36,10 +36,19 @@ class NewsController(
 
     @Get("/")
     suspend fun getNewsList(@QueryValue(defaultValue = "0") page: Int,
-                            @QueryValue(defaultValue = "6") size: Int): HttpResponse<Page<NewsDto>> = try {
+                            @QueryValue(defaultValue = "6") size: Int,
+                            @QueryValue tag: String? = null): HttpResponse<Page<NewsDto>> = try {
         val sort = Sort.of(Sort.Order.desc("created"))
         val pageable = Pageable.from(page, size, sort)
-        val newsPage = newsRepository.findAll(pageable)
+        val newsPage = if (tag != null) {
+            val tagId = tagsRepository.findByTag(tag)?.id
+            ?: return HttpResponse.ok(Page.empty())
+            val newsIds = newsTagsRepository.findByIdTagId(tagId).map { it.id.newsId }
+            if (newsIds.isEmpty()) return HttpResponse.ok(Page.empty())
+            newsRepository.findByIdIn(newsIds, pageable)
+        } else {
+            newsRepository.findAll(pageable)
+        }
         val newsIds = newsPage.content.map { it.id }
         val tagsByNewsId = newsTagsRepository.findByIdNewsIdIn(newsIds)
             .groupBy { it.id.newsId }
