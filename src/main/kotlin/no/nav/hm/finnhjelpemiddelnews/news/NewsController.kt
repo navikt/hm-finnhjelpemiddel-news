@@ -47,19 +47,17 @@ class NewsController(
                 if (tagIds.isEmpty()) return HttpResponse.ok(Page.empty())
                 val newsIds = newsTagsRepository.findByIdTagIdIn(tagIds).map { it.id.newsId }.distinct()
                 if (newsIds.isEmpty()) return HttpResponse.ok(Page.empty())
-                newsRepository.findByIdInAndTitleIlikeOrIdInAndDescriptionIlike(
-                newsIds, "%$search%", newsIds, "%$search%", pageable
-                )
+                newsRepository.searchPublishedByIds(newsIds, "%$search%", pageable)
             }
             tag != null -> {
                 val tagIds = tagsRepository.findByTagIn(tag).map { it.id }
                 if (tagIds.isEmpty()) return HttpResponse.ok(Page.empty())
                 val newsIds = newsTagsRepository.findByIdTagIdIn(tagIds).map { it.id.newsId }.distinct()
                 if (newsIds.isEmpty()) return HttpResponse.ok(Page.empty())
-                newsRepository.findByIdIn(newsIds, pageable)
+                newsRepository.findPublishedByIds(newsIds, pageable)
             }
-            search != null -> newsRepository.findByTitleIlikeOrDescriptionIlike("%$search%", "%$search%", pageable)
-            else -> newsRepository.findAll(pageable)
+            search != null -> newsRepository.searchPublished("%$search%", pageable)
+            else -> newsRepository.findAllPublished(pageable)
         }
         val newsIds = newsPage.content.map { it.id }
         val tagsByNewsId = newsTagsRepository.findByIdNewsIdIn(newsIds)

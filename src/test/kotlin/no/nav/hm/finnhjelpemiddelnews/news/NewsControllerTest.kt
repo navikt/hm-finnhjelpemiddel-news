@@ -15,11 +15,11 @@ class NewsControllerTest (
     private val newsRepository: NewsRepository,
 ) {
     val newsDto = News(title = "Nyhet 1", description = "", body = "Dette er en nyhet", created = LocalDateTime.now(),
-        publishedFrom = LocalDateTime.now(), publishedTo = LocalDateTime.now(), image_url = null, imageDescription = "")
+        publishedFrom = LocalDateTime.now().minusDays(1), publishedTo = LocalDateTime.now().plusYears(1), image_url = null, imageDescription = "")
     val newsDto2 = News(title = "Nyhet 2", description = "", body = "Dette er en nyhet", created = LocalDateTime.now(),
-        publishedFrom = LocalDateTime.now(), publishedTo = LocalDateTime.now(), image_url = null, imageDescription = "")
+        publishedFrom = LocalDateTime.now().minusDays(1), publishedTo = LocalDateTime.now().plusYears(1), image_url = null, imageDescription = "")
     val newsDto3 = News(title = "Nyhet 3", description = "", body = "Dette er en nyhet", created = LocalDateTime.now(),
-        publishedFrom = LocalDateTime.now(), publishedTo = LocalDateTime.now(), image_url = null, imageDescription = "")
+        publishedFrom = LocalDateTime.now().minusDays(1), publishedTo = LocalDateTime.now().plusYears(1), image_url = null, imageDescription = "")
 
 
     @Test
