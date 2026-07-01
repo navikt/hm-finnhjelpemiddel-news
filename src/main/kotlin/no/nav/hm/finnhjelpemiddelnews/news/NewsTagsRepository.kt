@@ -11,4 +11,5 @@ interface NewsTagsRepository : CoroutineCrudRepository<NewsTags, NewsTagsId> {
     suspend fun findByIdNewsIdIn(newsIds: List<UUID>): List<NewsTags>
     suspend fun deleteByIdNewsId(newsId: UUID)
     suspend fun findByIdTagId(tagId: UUID): List<NewsTags>
+    suspend fun findByIdTagIdIn(tagIds: List<UUID>): List<NewsTags>
 }

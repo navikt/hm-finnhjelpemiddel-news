@@ -37,24 +37,24 @@ class NewsController(
     @Get("/")
     suspend fun getNewsList(@QueryValue(defaultValue = "0") page: Int,
                             @QueryValue(defaultValue = "6") size: Int,
-                            @QueryValue tag: String? = null,
+                            @QueryValue tag: List<String>? = null,
                             @QueryValue search: String? = null): HttpResponse<Page<NewsDto>> = try {
         val sort = Sort.of(Sort.Order.desc("created"))
         val pageable = Pageable.from(page, size, sort)
         val newsPage = when {
             tag != null && search != null -> {
-                val tagId = tagsRepository.findByTag(tag)?.id
-                ?: return HttpResponse.ok(Page.empty())
-                val newsIds = newsTagsRepository.findByIdTagId(tagId).map { it.id.newsId }
+                val tagIds = tagsRepository.findByTagIn(tag).map { it.id }
+                if (tagIds.isEmpty()) return HttpResponse.ok(Page.empty())
+                val newsIds = newsTagsRepository.findByIdTagIdIn(tagIds).map { it.id.newsId }.distinct()
                 if (newsIds.isEmpty()) return HttpResponse.ok(Page.empty())
                 newsRepository.findByIdInAndTitleIlikeOrIdInAndDescriptionIlike(
                 newsIds, "%$search%", newsIds, "%$search%", pageable
                 )
             }
             tag != null -> {
-                val tagId = tagsRepository.findByTag(tag)?.id
-                    ?: return HttpResponse.ok(Page.empty())
-                val newsIds = newsTagsRepository.findByIdTagId(tagId).map { it.id.newsId }
+                val tagIds = tagsRepository.findByTagIn(tag).map { it.id }
+                if (tagIds.isEmpty()) return HttpResponse.ok(Page.empty())
+                val newsIds = newsTagsRepository.findByIdTagIdIn(tagIds).map { it.id.newsId }.distinct()
                 if (newsIds.isEmpty()) return HttpResponse.ok(Page.empty())
                 newsRepository.findByIdIn(newsIds, pageable)
             }
