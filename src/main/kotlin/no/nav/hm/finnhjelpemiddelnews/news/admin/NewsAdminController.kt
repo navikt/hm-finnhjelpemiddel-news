@@ -124,7 +124,7 @@ class NewsAdminController(
         consumes = [MULTIPART_FORM_DATA],
         produces = [APPLICATION_JSON]
     )
-    suspend fun uploadNewsImage(newsId: UUID, @Body files: Publisher<CompletedFileUpload>): HttpResponse<MediaDTO> {
+    suspend fun uploadNewsImage(newsId: UUID, files: Publisher<CompletedFileUpload>): HttpResponse<MediaDTO> {
         val news = newsRepository.findById(newsId) ?: return HttpResponse.notFound()
         val file = files.asFlow().firstOrNull() ?: return HttpResponse.badRequest()
         val media = mediaUploadService.uploadMedia(file, newsId, ObjectType.UNKNOWN)
