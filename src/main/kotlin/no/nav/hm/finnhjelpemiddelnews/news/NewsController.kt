@@ -42,6 +42,15 @@ class NewsController(
         val sort = Sort.of(Sort.Order.desc("created"))
         val pageable = Pageable.from(page, size, sort)
         val newsPage = when {
+            tag != null && search != null -> {
+                val tagId = tagsRepository.findByTag(tag)?.id
+                ?: return HttpResponse.ok(Page.empty())
+                val newsIds = newsTagsRepository.findByIdTagId(tagId).map { it.id.newsId }
+                if (newsIds.isEmpty()) return HttpResponse.ok(Page.empty())
+                newsRepository.findByIdInAndTitleIlikeOrIdInAndDescriptionIlike(
+                newsIds, "%$search%", newsIds, "%$search%", pageable
+                )
+            }
             tag != null -> {
                 val tagId = tagsRepository.findByTag(tag)?.id
                     ?: return HttpResponse.ok(Page.empty())

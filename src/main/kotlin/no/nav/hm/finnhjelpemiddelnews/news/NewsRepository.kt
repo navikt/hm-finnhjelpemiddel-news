@@ -14,4 +14,5 @@ interface NewsRepository : CoroutineCrudRepository<News, UUID>, CoroutinePageabl
     suspend fun findByTitle(title: String): News
     suspend fun findByIdIn(ids: List<UUID>, pageable: Pageable): Page<News>
     suspend fun findByTitleIlikeOrDescriptionIlike(title: String, description: String, pageable: Pageable): Page<News>
+    suspend fun findByIdInAndTitleIlikeOrIdInAndDescriptionIlike(ids1: List<UUID>, title: String, ids2: List<UUID>, description: String, pageable: Pageable): Page<News>
 }
