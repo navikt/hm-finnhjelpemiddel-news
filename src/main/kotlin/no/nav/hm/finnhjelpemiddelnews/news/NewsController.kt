@@ -1,6 +1,7 @@
 package no.nav.hm.finnhjelpemiddelnews.news
 
 import io.micronaut.data.model.Page
+import io.micronaut.data.model.Sort
 
 import io.micronaut.http.HttpResponse
 import io.micronaut.http.annotation.Controller
@@ -39,7 +40,7 @@ class NewsController(
                             @QueryValue(defaultValue = "6") size: Int,
                             @QueryValue tag: List<String>? = null,
                             @QueryValue search: String? = null): HttpResponse<Page<NewsDto>> = try {
-       HttpResponse.ok(newsService.getNews(page,size,tag,search, active =true))
+       HttpResponse.ok(newsService.getNews(page,size,tag,search, active =true, Sort.of(Sort.Order.asc("created"))))
     } catch (exception: Exception) {
         LOG.error("Feil ved henting av news", exception)
         HttpResponse.notFound()

@@ -1,6 +1,7 @@
 package no.nav.hm.finnhjelpemiddelnews.news.admin
 
 import io.micronaut.data.model.Page
+import io.micronaut.data.model.Sort
 import io.micronaut.http.HttpResponse
 import io.micronaut.http.MediaType.APPLICATION_JSON
 import io.micronaut.http.MediaType.MULTIPART_FORM_DATA
@@ -49,7 +50,7 @@ class NewsAdminController(
                             @QueryValue(defaultValue = "6") size: Int,
                             @QueryValue tag: List<String>? = null,
                             @QueryValue search: String? = null): HttpResponse<Page<NewsDto>> = try {
-        HttpResponse.ok(newsService.getNews(page,size,tag,search, active =false))
+        HttpResponse.ok(newsService.getNews(page,size,tag,search, active =false, sort = Sort.of(Sort.Order.desc("updated"), Sort.Order.asc("created")) ))
     } catch (exception: Exception) {
         LOG.error("Feil ved henting av news", exception)
         HttpResponse.notFound()
@@ -70,6 +71,7 @@ class NewsAdminController(
                     publishedTo = createNewsDto.publishedTo,
                     image_url = createNewsDto.image_url,
                     imageDescription = createNewsDto.imageDescription,
+                    status = createNewsDto.status,
                 ))
                 val tagLinks = createNewsDto.tags.map { tagId ->
                     NewsTags(NewsTagsId(tagId = UUID.fromString(tagId), newsId = saved.id))
@@ -103,6 +105,7 @@ class NewsAdminController(
                       publishedTo = newsDto.publishedTo,
                       image_url = newsDto.image_url,
                       imageDescription = newsDto.imageDescription,
+                      status = newsDto.status,
                   )
                     newsTagsRepository.deleteByIdNewsId(updatedNews.id)
                     val tagLinks = newsDto.tags.map { tagId ->

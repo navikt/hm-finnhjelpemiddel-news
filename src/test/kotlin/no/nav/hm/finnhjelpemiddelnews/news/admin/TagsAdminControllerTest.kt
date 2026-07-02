@@ -11,6 +11,7 @@ import no.nav.hm.finnhjelpemiddelnews.news.CreateNewsDto
 import no.nav.hm.finnhjelpemiddelnews.news.CreateTagDto
 import no.nav.hm.finnhjelpemiddelnews.news.News
 import no.nav.hm.finnhjelpemiddelnews.news.NewsRepository
+import no.nav.hm.finnhjelpemiddelnews.news.Status
 import no.nav.hm.finnhjelpemiddelnews.news.TagsRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -26,8 +27,8 @@ class TagsAdminControllerTest(
     val news = News(
         title = "Testnyheten", description = "Test", body = "Innhold",
         created = LocalDateTime.now(), publishedFrom = LocalDateTime.now(),
-        publishedTo = LocalDateTime.now(), image_url = null, imageDescription = ""
-    )
+        publishedTo = LocalDateTime.now(), image_url = null, imageDescription = "",
+        status = Status.PUBLISHED)
 
     @BeforeEach
     fun init() = runBlocking {
@@ -115,7 +116,7 @@ class TagsAdminControllerTest(
         runBlocking {
             val newsId = newsAdminController.createNews(
                 CreateNewsDto(title = "Nyhet med tags", description = "", body = "Innhold",
-                    publishedFrom = LocalDateTime.now(), publishedTo = LocalDateTime.now(), image_url = null, imageDescription = "")
+                    publishedFrom = LocalDateTime.now(), publishedTo = LocalDateTime.now(), image_url = null, imageDescription = "", status = Status.PUBLISHED)
             ).body()
             val tagId = tagsAdminController.createTags(CreateTagDto(tag = "rullestol")).body()
             tagsAdminController.linkTagToNews(tagId, newsId)
