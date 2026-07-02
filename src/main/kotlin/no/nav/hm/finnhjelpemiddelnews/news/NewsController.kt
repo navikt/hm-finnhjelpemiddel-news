@@ -1,8 +1,7 @@
 package no.nav.hm.finnhjelpemiddelnews.news
 
 import io.micronaut.data.model.Page
-import io.micronaut.data.model.Pageable
-import io.micronaut.data.model.Sort
+
 import io.micronaut.http.HttpResponse
 import io.micronaut.http.annotation.Controller
 import io.micronaut.http.annotation.Get
@@ -16,6 +15,7 @@ import org.slf4j.LoggerFactory
 @Controller("/news")
 @Tag(name = "News")
 class NewsController(
+    private val newsService: NewsService,
     private val newsRepository: NewsRepository,
     private val tagsRepository: TagsRepository,
     private val newsTagsRepository: NewsTagsRepository
@@ -39,36 +39,7 @@ class NewsController(
                             @QueryValue(defaultValue = "6") size: Int,
                             @QueryValue tag: List<String>? = null,
                             @QueryValue search: String? = null): HttpResponse<Page<NewsDto>> = try {
-        val sort = Sort.of(Sort.Order.desc("created"))
-        val pageable = Pageable.from(page, size, sort)
-        val newsPage = when {
-            tag != null && search != null -> {
-                val tagIds = tagsRepository.findByTagIn(tag).map { it.id }
-                if (tagIds.isEmpty()) return HttpResponse.ok(Page.empty())
-                val newsIds = newsTagsRepository.findByIdTagIdIn(tagIds).map { it.id.newsId }.distinct()
-                if (newsIds.isEmpty()) return HttpResponse.ok(Page.empty())
-                newsRepository.searchPublishedByIds(newsIds, "%$search%", pageable)
-            }
-            tag != null -> {
-                val tagIds = tagsRepository.findByTagIn(tag).map { it.id }
-                if (tagIds.isEmpty()) return HttpResponse.ok(Page.empty())
-                val newsIds = newsTagsRepository.findByIdTagIdIn(tagIds).map { it.id.newsId }.distinct()
-                if (newsIds.isEmpty()) return HttpResponse.ok(Page.empty())
-                newsRepository.findPublishedByIds(newsIds, pageable)
-            }
-            search != null -> newsRepository.searchPublished("%$search%", pageable)
-            else -> newsRepository.findAllPublished(pageable)
-        }
-        val newsIds = newsPage.content.map { it.id }
-        val tagsByNewsId = newsTagsRepository.findByIdNewsIdIn(newsIds)
-            .groupBy { it.id.newsId }
-        val allTagNames = tagsRepository.findByIdIn(tagsByNewsId.values.flatten().map { it.id.tagId })
-            .associateBy { it.id }
-        val newsDtos = newsPage.content.map { news ->
-            val tags = tagsByNewsId[news.id]?.map { allTagNames[it.id.tagId]?.tag ?: "" } ?: emptyList()
-            news.toDto(tags)
-        }
-        HttpResponse.ok(Page.of(newsDtos, pageable, newsPage.totalSize))
+       HttpResponse.ok(newsService.getNews(page,size,tag,search, active =true))
     } catch (exception: Exception) {
         LOG.error("Feil ved henting av news", exception)
         HttpResponse.notFound()

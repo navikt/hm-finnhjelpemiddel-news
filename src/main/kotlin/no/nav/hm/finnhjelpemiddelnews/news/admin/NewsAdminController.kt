@@ -1,5 +1,6 @@
 package no.nav.hm.finnhjelpemiddelnews.news.admin
 
+import io.micronaut.data.model.Page
 import io.micronaut.http.HttpResponse
 import io.micronaut.http.MediaType.APPLICATION_JSON
 import io.micronaut.http.MediaType.MULTIPART_FORM_DATA
@@ -10,6 +11,7 @@ import io.micronaut.http.annotation.Delete
 import io.micronaut.http.annotation.Get
 import io.micronaut.http.annotation.Post
 import io.micronaut.http.annotation.Put
+import io.micronaut.http.annotation.QueryValue
 import io.micronaut.http.multipart.CompletedFileUpload
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.toList
@@ -20,7 +22,9 @@ import no.nav.hm.finnhjelpemiddelnews.media.MediaUploadService
 import no.nav.hm.finnhjelpemiddelnews.media.ObjectType
 import no.nav.hm.finnhjelpemiddelnews.news.CreateNewsDto
 import no.nav.hm.finnhjelpemiddelnews.news.News
+import no.nav.hm.finnhjelpemiddelnews.news.NewsDto
 import no.nav.hm.finnhjelpemiddelnews.news.NewsRepository
+import no.nav.hm.finnhjelpemiddelnews.news.NewsService
 import no.nav.hm.finnhjelpemiddelnews.news.NewsTags
 import no.nav.hm.finnhjelpemiddelnews.news.NewsTagsId
 import no.nav.hm.finnhjelpemiddelnews.news.NewsTagsRepository
@@ -30,6 +34,7 @@ import java.util.UUID
 
 @Controller("/admin/news")
 class NewsAdminController(
+    private val newsService: NewsService,
     private val newsRepository: NewsRepository,
     private val newsTagsRepository: NewsTagsRepository,
     private val mediaUploadService: MediaUploadService,
@@ -37,6 +42,17 @@ class NewsAdminController(
 
     companion object {
         private val LOG = LoggerFactory.getLogger(NewsAdminController::class.java)
+    }
+
+    @Get("/")
+    suspend fun getAllNews(@QueryValue(defaultValue = "0") page: Int,
+                            @QueryValue(defaultValue = "6") size: Int,
+                            @QueryValue tag: List<String>? = null,
+                            @QueryValue search: String? = null): HttpResponse<Page<NewsDto>> = try {
+        HttpResponse.ok(newsService.getNews(page,size,tag,search, active =false))
+    } catch (exception: Exception) {
+        LOG.error("Feil ved henting av news", exception)
+        HttpResponse.notFound()
     }
 
     @Post("/")
