@@ -15,8 +15,8 @@ class NewsService(private val newsRepository: NewsRepository,
         tag: List<String>?,
         search: String?,
         active: Boolean,
+        sort: Sort
     ): Page<NewsDto> {
-        val sort = Sort.of(Sort.Order.desc("created"))
         val pageable = Pageable.from(page,size,sort)
 
         val newsPage = when {

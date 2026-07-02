@@ -21,8 +21,9 @@ data class News(
     val publishedTo: LocalDateTime,
     val image_url: String?,
     val imageDescription: String?,
+    val status: Status,
 ) {fun toDto(tags: List<String> = emptyList()): NewsDto {return NewsDto(id=id, title=title, description=description, body=body, created=created,
-    updated=updated, publishedFrom=publishedFrom, publishedTo=publishedTo, image_url=image_url, imageDescription=imageDescription, tags=tags)}}
+    updated=updated, publishedFrom=publishedFrom, publishedTo=publishedTo, image_url=image_url, imageDescription=imageDescription, tags=tags, status=status)}}
 
 @Serdeable
 data class CreateNewsDto(
@@ -33,6 +34,7 @@ data class CreateNewsDto(
     val publishedTo: LocalDateTime,
     val image_url: String?,
     val imageDescription: String? = null,
+    val status: Status,
     val tags: List<String> = emptyList()
 )
 
@@ -49,5 +51,6 @@ data class NewsDto(
     val publishedTo: LocalDateTime,
     val image_url: String?,
     val imageDescription: String?,
+    val status: Status,
     val tags: List<String> = emptyList()
 )
