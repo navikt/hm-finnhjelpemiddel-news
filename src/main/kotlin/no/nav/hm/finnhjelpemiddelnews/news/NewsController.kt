@@ -39,8 +39,8 @@ class NewsController(
     suspend fun getNewsList(@QueryValue(defaultValue = "0") page: Int,
                             @QueryValue(defaultValue = "6") size: Int,
                             @QueryValue tag: List<String>? = null,
-                            @QueryValue search: String? = null): HttpResponse<Page<NewsDto>> = try {
-       HttpResponse.ok(newsService.getNews(page,size,tag,search, active =true, Sort.of(Sort.Order.asc("created"))))
+                            @QueryValue search: String? = null, ): HttpResponse<Page<NewsDto>> = try {
+       HttpResponse.ok(newsService.getNews(page,size,tag,search, active =true, Sort.of(Sort.Order.desc("created")) ))
     } catch (exception: Exception) {
         LOG.error("Feil ved henting av news", exception)
         HttpResponse.notFound()

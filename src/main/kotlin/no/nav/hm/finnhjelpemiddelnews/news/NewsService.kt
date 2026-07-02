@@ -15,7 +15,8 @@ class NewsService(private val newsRepository: NewsRepository,
         tag: List<String>?,
         search: String?,
         active: Boolean,
-        sort: Sort
+        sort: Sort = Sort.of(Sort.Order.desc("created")),
+        status: Status? = null,
     ): Page<NewsDto> {
         val pageable = Pageable.from(page,size,sort)
 
@@ -25,7 +26,7 @@ class NewsService(private val newsRepository: NewsRepository,
                 if (tagsIds.isEmpty()) return Page.empty()
                 val newsIds = newsTagsRepository.findByIdTagIdIn(tagsIds).map { it.id.newsId }.distinct()
                 if (newsIds.isEmpty()) return Page.empty()
-                newsRepository.searchAllByIds(newsIds, "%$search%", pageable, active)
+                newsRepository.searchAllByIds(newsIds, "%$search%", pageable, active, status)
 
             }
             tag != null -> {
@@ -33,10 +34,10 @@ class NewsService(private val newsRepository: NewsRepository,
                 if (tagIds.isEmpty()) return Page.empty()
                 val newsIds = newsTagsRepository.findByIdTagIdIn(tagIds).map { it.id.newsId }.distinct()
                 if (newsIds.isEmpty()) return Page.empty()
-                newsRepository.findAllByIds(newsIds, pageable, active)
+                newsRepository.findAllByIds(newsIds, pageable, active, status)
             }
-            search != null -> newsRepository.searchAll("%$search%", pageable, active)
-            else -> newsRepository.findAllPaged(pageable, active)
+            search != null -> newsRepository.searchAll("%$search%", pageable, active, status)
+            else -> newsRepository.findAllPaged(pageable, active, status)
         }
 
         val newsIds = newsPage.content.map { it.id }

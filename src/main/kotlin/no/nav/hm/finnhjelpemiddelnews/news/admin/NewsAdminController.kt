@@ -29,6 +29,7 @@ import no.nav.hm.finnhjelpemiddelnews.news.NewsService
 import no.nav.hm.finnhjelpemiddelnews.news.NewsTags
 import no.nav.hm.finnhjelpemiddelnews.news.NewsTagsId
 import no.nav.hm.finnhjelpemiddelnews.news.NewsTagsRepository
+import no.nav.hm.finnhjelpemiddelnews.news.Status
 import org.reactivestreams.Publisher
 import java.time.LocalDateTime
 import java.util.UUID
@@ -49,8 +50,9 @@ class NewsAdminController(
     suspend fun getAllNews(@QueryValue(defaultValue = "0") page: Int,
                             @QueryValue(defaultValue = "6") size: Int,
                             @QueryValue tag: List<String>? = null,
-                            @QueryValue search: String? = null): HttpResponse<Page<NewsDto>> = try {
-        HttpResponse.ok(newsService.getNews(page,size,tag,search, active =false, sort = Sort.of(Sort.Order.desc("updated"), Sort.Order.asc("created")) ))
+                            @QueryValue search: String? = null,
+                           @QueryValue status: Status? = null): HttpResponse<Page<NewsDto>> = try {
+        HttpResponse.ok(newsService.getNews(page,size,tag,search, active =false, sort = Sort.of(Sort.Order.desc("updated"), Sort.Order.desc("created")), status))
     } catch (exception: Exception) {
         LOG.error("Feil ved henting av news", exception)
         HttpResponse.notFound()

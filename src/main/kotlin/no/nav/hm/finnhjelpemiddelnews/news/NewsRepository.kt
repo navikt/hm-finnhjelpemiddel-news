@@ -15,27 +15,38 @@ interface NewsRepository : CoroutineCrudRepository<News, UUID>, CoroutinePageabl
     suspend fun findByTitle(title: String): News
 
     @Query(
-        value = "SELECT news_.* FROM news news_ WHERE news_.id IN (:ids) AND (news_.title ILIKE :search OR news_.description ILIKE :search) AND (:active = false OR (news_.published_from <= NOW() AND news_.published_to >= NOW() AND news_.status = 'PUBLISHED'))",
-        countQuery = "SELECT COUNT(*) FROM news WHERE id IN (:ids) AND (title ILIKE :search OR description ILIKE :search) AND (:active = false OR (published_from <= NOW() AND published_to >= NOW() AND status = 'PUBLISHED'))"
+        value = """SELECT news_.* FROM news news_ 
+             WHERE news_.id IN (:ids) 
+             AND (news_.title ILIKE :search OR news_.description ILIKE :search) 
+             AND (:active = false OR (news_.published_from <= NOW() AND news_.published_to >= NOW() AND news_.status = 'PUBLISHED'))
+             AND (:status is NULL OR news_.status = :status)""",
+        countQuery = "SELECT COUNT(*) FROM news WHERE id IN (:ids) AND (title ILIKE :search OR description ILIKE :search) AND (:active = false OR (published_from <= NOW() AND published_to >= NOW() AND status = 'PUBLISHED')) AND (:status IS NULL OR status = :status)"
     )
-    suspend fun searchAllByIds(ids: List<UUID>, search: String, pageable: Pageable, active: Boolean): Page<News>
+    suspend fun searchAllByIds(ids: List<UUID>, search: String, pageable: Pageable, active: Boolean, status: Status?): Page<News>
 
 
     @Query(
-        value = "SELECT news_.* FROM news news_ WHERE news_.id in (:ids) AND (:active = false OR (news_.published_from <= NOW() AND news_.published_to >= NOW() AND news_.status = 'PUBLISHED'))",
-        countQuery = "SELECT COUNT(*) FROM news WHERE id IN (:ids) AND (:active = false OR (published_from <= NOW() AND published_to >= NOW() AND status = 'PUBLISHED'))"
+        value = """SELECT news_.* FROM news news_ 
+            WHERE news_.id in (:ids) 
+            AND (:active = false OR (news_.published_from <= NOW() AND news_.published_to >= NOW() AND news_.status = 'PUBLISHED'))
+            AND (:status IS NULL OR news_.status = :status)""",
+        countQuery = "SELECT COUNT(*) FROM news WHERE id IN (:ids) AND (:active = false OR (published_from <= NOW() AND published_to >= NOW() AND status = 'PUBLISHED')) AND (:status IS NULL OR status = :status)"
     )
-    suspend fun findAllByIds(ids: List<UUID>, pageable: Pageable, active: Boolean): Page<News>
+    suspend fun findAllByIds(ids: List<UUID>, pageable: Pageable, active: Boolean, status: Status?): Page<News>
 
     @Query(
-        value = "SELECT news_.* FROM news news_ WHERE (news_.title ILIKE :search OR news_.description ILIKE :search) AND (:active = false OR (news_.published_from <= NOW() AND news_.published_to >= NOW() AND news_.status = 'PUBLISHED'))",
-        countQuery = "SELECT COUNT(*) FROM news WHERE (title ILIKE :search OR description ILIKE :search) AND (:active = false OR (published_from <= NOW() AND published_to >= NOW() AND status = 'PUBLISHED'))"
+        value = """SELECT news_.* FROM news news_ 
+            WHERE (news_.title ILIKE :search OR news_.description ILIKE :search) 
+            AND (:active = false OR (news_.published_from <= NOW() AND news_.published_to >= NOW() AND news_.status = 'PUBLISHED'))
+            AND (:status IS NULL OR news_.status = :status)""",
+        countQuery = "SELECT COUNT(*) FROM news WHERE (title ILIKE :search OR description ILIKE :search) AND (:active = false OR (published_from <= NOW() AND published_to >= NOW() AND status = 'PUBLISHED')) AND (:status IS NULL OR status = :status)"
     )
-    suspend fun searchAll(search: String, pageable: Pageable, active: Boolean): Page<News>
+    suspend fun searchAll(search: String, pageable: Pageable, active: Boolean, status: Status?): Page<News>
 
     @Query(
-        value = "SELECT news_.* FROM news news_ WHERE (:active = false OR (news_.published_from <= NOW() AND news_.published_to >= NOW() AND news_.status = 'PUBLISHED'))",
-        countQuery = "SELECT COUNT(*) FROM news WHERE (:active = false OR (published_from <= NOW() AND published_to >= NOW() and status = 'PUBLISHED'))"
+        value = """SELECT news_.* FROM news news_ 
+            WHERE (:active = false OR (news_.published_from <= NOW() AND news_.published_to >= NOW() AND news_.status = 'PUBLISHED')) AND (:status IS NULL OR news_.status = :status)""",
+        countQuery = "SELECT COUNT(*) FROM news WHERE (:active = false OR (published_from <= NOW() AND published_to >= NOW() and status = 'PUBLISHED')) AND (:status IS NULL OR status = :status)"
     )
-    suspend fun findAllPaged(pageable: Pageable, active: Boolean): Page<News>
+    suspend fun findAllPaged(pageable: Pageable, active: Boolean, status: Status?): Page<News>
 }
