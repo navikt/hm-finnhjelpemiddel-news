@@ -64,11 +64,13 @@ class NewsAdminController(
         return try {
             if (createNewsDto.title.isBlank()) return HttpResponse.badRequest()
             val news = runBlocking {
+                val now = LocalDateTime.now()
                 val saved = newsRepository.save(News(
                     title = createNewsDto.title,
                     description = createNewsDto.description,
                     body = createNewsDto.body,
-                    created = LocalDateTime.now(),
+                    created = now,
+                    updated = now,
                     publishedFrom = createNewsDto.publishedFrom,
                     publishedTo = createNewsDto.publishedTo,
                     image_url = createNewsDto.image_url,
