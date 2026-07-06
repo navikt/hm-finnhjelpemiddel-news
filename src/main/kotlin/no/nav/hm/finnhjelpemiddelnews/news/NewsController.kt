@@ -8,8 +8,6 @@ import io.micronaut.http.annotation.Controller
 import io.micronaut.http.annotation.Get
 import io.micronaut.http.annotation.QueryValue
 import io.swagger.v3.oas.annotations.tags.Tag
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.toList
 import java.util.UUID
 import org.slf4j.LoggerFactory
 
@@ -48,9 +46,8 @@ class NewsController(
 
     @Get("/list")
     suspend fun getNewsBySize(@QueryValue(defaultValue = "5") size: Int): HttpResponse<List<NewsDto>> = try {
-        newsRepository.findAll().map { news ->
-            news.toDto(fetchTagsForNews(news.id))
-        }.toList().take(size).let { HttpResponse.ok(it) }
+        newsService.getNews(0, size, null, null, active = true).content
+            .let { HttpResponse.ok(it) }
     } catch (exception: Exception) {
         LOG.error("Feil ved henting av news", exception)
         HttpResponse.notFound()
