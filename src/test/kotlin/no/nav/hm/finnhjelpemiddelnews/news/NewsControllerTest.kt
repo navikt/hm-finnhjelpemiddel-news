@@ -4,7 +4,6 @@ import io.micronaut.test.extensions.junit5.annotation.MicronautTest
 import org.junit.jupiter.api.Test
 import kotlinx.coroutines.runBlocking
 import io.kotest.matchers.shouldBe
-import io.micronaut.data.model.Pageable
 import io.micronaut.http.HttpStatus
 import java.time.LocalDateTime
 import java.util.UUID
@@ -15,11 +14,11 @@ class NewsControllerTest (
     private val newsRepository: NewsRepository,
 ) {
     val newsDto = News(title = "Nyhet 1", description = "", body = "Dette er en nyhet", created = LocalDateTime.now(),
-        publishedFrom = LocalDateTime.now(), publishedTo = LocalDateTime.now(), image_url = null, imageDescription = "")
+        publishedFrom = LocalDateTime.now().minusDays(1), publishedTo = LocalDateTime.now().plusYears(1), image_url = null, imageDescription = "", status = Status.PUBLISHED)
     val newsDto2 = News(title = "Nyhet 2", description = "", body = "Dette er en nyhet", created = LocalDateTime.now(),
-        publishedFrom = LocalDateTime.now(), publishedTo = LocalDateTime.now(), image_url = null, imageDescription = "")
+        publishedFrom = LocalDateTime.now().minusDays(1), publishedTo = LocalDateTime.now().plusYears(1), image_url = null, imageDescription = "", status = Status.PUBLISHED)
     val newsDto3 = News(title = "Nyhet 3", description = "", body = "Dette er en nyhet", created = LocalDateTime.now(),
-        publishedFrom = LocalDateTime.now(), publishedTo = LocalDateTime.now(), image_url = null, imageDescription = "")
+        publishedFrom = LocalDateTime.now().minusDays(1), publishedTo = LocalDateTime.now().plusYears(1), image_url = null, imageDescription = "", status = Status.PUBLISHED)
 
 
     @Test

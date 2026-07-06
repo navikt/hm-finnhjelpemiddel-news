@@ -9,6 +9,7 @@ import no.nav.hm.finnhjelpemiddelnews.news.CreateNewsDto
 import no.nav.hm.finnhjelpemiddelnews.news.News
 import no.nav.hm.finnhjelpemiddelnews.news.NewsController
 import no.nav.hm.finnhjelpemiddelnews.news.NewsRepository
+import no.nav.hm.finnhjelpemiddelnews.news.Status
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
@@ -20,7 +21,7 @@ class NewsAdminControllerTest (
     private val newsAdminController: NewsAdminController)
 {
     val newsDto = News(title = "Nyhet 1", description = "Deez nuts", body = "Dette er en nyhet", created = LocalDateTime.now(),
-        publishedFrom = LocalDateTime.now(), publishedTo = LocalDateTime.now(), image_url = null, imageDescription = "")
+        publishedFrom = LocalDateTime.now(), publishedTo = LocalDateTime.now(), image_url = null, imageDescription = "", status = Status.PUBLISHED)
 
     @BeforeEach
     fun init() = runBlocking {
@@ -45,7 +46,7 @@ class NewsAdminControllerTest (
     fun postTest() {
         runBlocking {
             val dto = CreateNewsDto(title = "Nyhet 2", description = "ohio", body = "Dette er ny nyhet", publishedFrom = LocalDateTime.now(),
-                publishedTo = LocalDateTime.now(), image_url = null, imageDescription = "", tags = emptyList())
+                publishedTo = LocalDateTime.now(), image_url = null, imageDescription = "", tags = emptyList(), status = Status.PUBLISHED)
             newsAdminController.createNews(dto)
 
             val created = newsRepository.findByTitle("Nyhet 2")
@@ -57,7 +58,7 @@ class NewsAdminControllerTest (
     fun putTest() {
         runBlocking {
             val updatedNews = CreateNewsDto(title = "Nyhet oppdatering", description = "oniichan", body = "Dette er en oppdatering",
-                publishedFrom = LocalDateTime.now(), publishedTo = LocalDateTime.now(), image_url = null, imageDescription = "", tags = emptyList())
+                publishedFrom = LocalDateTime.now(), publishedTo = LocalDateTime.now(), image_url = null, imageDescription = "", tags = emptyList(), status = Status.PUBLISHED)
             val response = newsAdminController.updateNews(updatedNews, newsDto.id)
             response.status shouldBe HttpStatus.OK
 
@@ -74,7 +75,7 @@ class NewsAdminControllerTest (
     fun badDeleteTest() {
         runBlocking {
             val dto = CreateNewsDto(title = "Nyhet 3",description = "daddy", body = "Dette er ny nyhet", publishedFrom = LocalDateTime.now(),
-                publishedTo = LocalDateTime.now(), image_url = null, imageDescription = "", tags = emptyList())
+                publishedTo = LocalDateTime.now(), image_url = null, imageDescription = "", tags = emptyList(), status = Status.PUBLISHED)
             val createdNewsId = newsAdminController.createNews(dto).body()
 
             newsAdminController.deleteNews(createdNewsId)
@@ -89,7 +90,7 @@ class NewsAdminControllerTest (
     fun badPostTest() {
         runBlocking {
             val dto = CreateNewsDto(title = "", description = "", body = "Dette er ny nyhet", publishedFrom = LocalDateTime.now(),
-                publishedTo = LocalDateTime.now(), image_url = null, imageDescription = "", tags = emptyList())
+                publishedTo = LocalDateTime.now(), image_url = null, imageDescription = "", tags = emptyList(), status = Status.PUBLISHED)
             val createdNewsId = newsAdminController.createNews(dto)
 
             createdNewsId.status shouldBe HttpStatus.BAD_REQUEST
