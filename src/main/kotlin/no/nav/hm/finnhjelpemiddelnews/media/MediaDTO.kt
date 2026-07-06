@@ -20,5 +20,5 @@ data class MediaDTO(
     val updated: LocalDateTime = LocalDateTime.now(),
 )
 
-enum class MediaType { IMAGE, PDF, OTHER }
+enum class MediaType { IMAGE, OTHER }
 enum class MediaSourceType { EXTERNALURL, UPLOAD, REGISTER, IMPORT }
