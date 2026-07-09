@@ -1,6 +1,7 @@
 package no.nav.hm.finnhjelpemiddelnews.news
 
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import kotlinx.coroutines.runBlocking
 import io.kotest.matchers.shouldBe
@@ -20,6 +21,11 @@ class NewsControllerTest (
     val newsDto3 = News(title = "Nyhet 3", description = "", body = "Dette er en nyhet", created = LocalDateTime.now(),
         publishedFrom = LocalDateTime.now().minusDays(1), publishedTo = LocalDateTime.now().plusYears(1), image_url = null, imageDescription = "", status = Status.PUBLISHED)
 
+
+    @BeforeEach
+    fun cleanup() {
+        runBlocking { newsRepository.deleteAll() }
+    }
 
     @Test
     fun getNewsByIdTest() {

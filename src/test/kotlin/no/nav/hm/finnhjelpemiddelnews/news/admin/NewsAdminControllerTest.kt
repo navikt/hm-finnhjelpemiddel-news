@@ -24,9 +24,11 @@ class NewsAdminControllerTest (
         publishedFrom = LocalDateTime.now(), publishedTo = LocalDateTime.now(), image_url = null, imageDescription = "", status = Status.PUBLISHED)
 
     @BeforeEach
-    fun init() = runBlocking {
-        newsRepository.save(newsDto)
-        Unit
+    fun init() {
+        runBlocking {
+            newsRepository.deleteAll()
+            newsRepository.save(newsDto)
+        }
     }
 
     @Test
@@ -47,10 +49,10 @@ class NewsAdminControllerTest (
         runBlocking {
             val dto = CreateNewsDto(title = "Nyhet 2", description = "ohio", body = "Dette er ny nyhet", publishedFrom = LocalDateTime.now(),
                 publishedTo = LocalDateTime.now(), image_url = null, imageDescription = "", tags = emptyList(), status = Status.PUBLISHED)
-            newsAdminController.createNews(dto)
+            val createdId = newsAdminController.createNews(dto).body()
 
-            val created = newsRepository.findByTitle("Nyhet 2")
-            created.body shouldBe dto.body
+            val created = newsRepository.findById(createdId)
+            created?.body shouldBe dto.body
         }
     }
 
@@ -94,13 +96,6 @@ class NewsAdminControllerTest (
             val createdNewsId = newsAdminController.createNews(dto)
 
             createdNewsId.status shouldBe HttpStatus.BAD_REQUEST
-        }
-    }
-
-    @Test
-    fun badPutTest() {
-        runBlocking {
-
         }
     }
 }
