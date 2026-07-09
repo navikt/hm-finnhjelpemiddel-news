@@ -26,7 +26,7 @@ class TagsAdminControllerTest(
     val news = News(
         title = "Testnyheten", description = "Test", body = "Innhold",
         created = LocalDateTime.now(), publishedFrom = LocalDateTime.now(),
-        publishedTo = LocalDateTime.now(), image_url = null, imageDescription = "",
+        publishedTo = LocalDateTime.now(), imageUrl = null, imageDescription = "",
         status = Status.PUBLISHED)
 
     @BeforeEach

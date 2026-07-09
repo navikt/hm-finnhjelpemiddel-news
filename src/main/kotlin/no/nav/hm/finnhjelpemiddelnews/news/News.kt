@@ -19,12 +19,21 @@ data class News(
     val updated: LocalDateTime? = null,
     val publishedFrom: LocalDateTime,
     val publishedTo: LocalDateTime,
-    val image_url: String?,
+    val imageUrl: String?,
     val imageDescription: String?,
     val status: Status,
     val comment: String? = null,
-) {fun toDto(tags: List<String> = emptyList()): NewsDto {return NewsDto(id=id, title=title, description=description, body=body, created=created,
-    updated=updated, publishedFrom=publishedFrom, publishedTo=publishedTo, image_url=image_url, imageDescription=imageDescription, tags=tags, status=status, comment=comment)}}
+) {
+    fun toDto(tags: List<String> = emptyList()): NewsDto = NewsDto(
+        id=id, title=title, description=description, body=body, created=created,
+        updated=updated, publishedFrom=publishedFrom, publishedTo=publishedTo,
+        imageUrl=imageUrl, imageDescription=imageDescription, tags=tags, status=status, comment=comment)
+
+    fun toPublicDto(tags: List<String> = emptyList()): PublicNewsDto = PublicNewsDto(
+        id=id, title=title, description=description, body=body, created=created,
+        updated=updated, publishedFrom=publishedFrom, publishedTo=publishedTo,
+        imageUrl=imageUrl, imageDescription=imageDescription, tags=tags, status=status)
+}
 
 @Serdeable
 data class CreateNewsDto(
@@ -33,7 +42,7 @@ data class CreateNewsDto(
     val body: String,
     val publishedFrom: LocalDateTime,
     val publishedTo: LocalDateTime,
-    val image_url: String?,
+    val imageUrl: String?,
     val imageDescription: String? = null,
     val status: Status,
     val tags: List<String> = emptyList(),
@@ -51,9 +60,32 @@ data class NewsDto(
     val updated: LocalDateTime?,
     val publishedFrom: LocalDateTime,
     val publishedTo: LocalDateTime,
-    val image_url: String?,
+    val imageUrl: String?,
     val imageDescription: String?,
     val status: Status,
     val tags: List<String> = emptyList(),
     val comment: String? = null,
+) {
+    fun toPublicDto(): PublicNewsDto = PublicNewsDto(
+        id=id, title=title, description=description, body=body, created=created,
+        updated=updated, publishedFrom=publishedFrom, publishedTo=publishedTo,
+        imageUrl=imageUrl, imageDescription=imageDescription, tags=tags, status=status)
+}
+
+@Serdeable
+@Introspected
+data class PublicNewsDto(
+    val id: UUID? = UUID.randomUUID(),
+    val title: String,
+    val description: String?,
+    val body: String,
+    val created: LocalDateTime,
+    val updated: LocalDateTime?,
+    val publishedFrom: LocalDateTime,
+    val publishedTo: LocalDateTime,
+    val imageUrl: String?,
+    val imageDescription: String?,
+    val status: Status,
+    val tags: List<String> = emptyList(),
 )
+
