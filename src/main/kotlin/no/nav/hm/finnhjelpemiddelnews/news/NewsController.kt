@@ -23,10 +23,10 @@ class NewsController(
     }
 
     @Get("/{id}")
-    suspend fun getNewsById(id: UUID): HttpResponse<NewsDto> = try {
+    suspend fun getNewsById(id: UUID): HttpResponse<PublicNewsDto> = try {
         val news = newsRepository.findOne(id)
         val tags = fetchTagsForNews(id)
-        HttpResponse.ok(news.toDto(tags))
+        HttpResponse.ok(news.toPublicDto(tags))
     } catch (exception: Exception) {
         LOG.error("Feil ved henting av news", exception)
         HttpResponse.notFound()
@@ -36,17 +36,9 @@ class NewsController(
     suspend fun getNewsList(@QueryValue(defaultValue = "0") page: Int,
                             @QueryValue(defaultValue = "6") size: Int,
                             @QueryValue tag: List<String>? = null,
-                            @QueryValue search: String? = null, ): HttpResponse<Page<NewsDto>> = try {
-       HttpResponse.ok(newsService.getNews(page, size, tag, search, Sort.of(Sort.Order.desc("created")), Status.PUBLISHED, PublishingState.ACTIVE))
-    } catch (exception: Exception) {
-        LOG.error("Feil ved henting av news", exception)
-        HttpResponse.notFound()
-    }
-
-    @Get("/list")
-    suspend fun getNewsBySize(@QueryValue(defaultValue = "5") size: Int): HttpResponse<List<NewsDto>> = try {
-        newsService.getNews(0, size, null, null, status = Status.PUBLISHED, publishingState = PublishingState.ACTIVE).content
-            .let { HttpResponse.ok(it) }
+                            @QueryValue search: String? = null, ): HttpResponse<Page<PublicNewsDto>> = try {
+        val newsPage = newsService.getNews(page, size, tag, search, Sort.of(Sort.Order.desc("created")), Status.PUBLISHED, PublishingState.ACTIVE)
+        HttpResponse.ok(newsPage.map { it.toPublicDto() })
     } catch (exception: Exception) {
         LOG.error("Feil ved henting av news", exception)
         HttpResponse.notFound()

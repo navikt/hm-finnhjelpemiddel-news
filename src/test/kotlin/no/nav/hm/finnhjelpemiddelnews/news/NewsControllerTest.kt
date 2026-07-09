@@ -15,11 +15,11 @@ class NewsControllerTest (
     private val newsRepository: NewsRepository,
 ) {
     val newsDto = News(title = "Nyhet 1", description = "", body = "Dette er en nyhet", created = LocalDateTime.now(),
-        publishedFrom = LocalDateTime.now().minusDays(1), publishedTo = LocalDateTime.now().plusYears(1), image_url = null, imageDescription = "", status = Status.PUBLISHED)
+        publishedFrom = LocalDateTime.now().minusDays(1), publishedTo = LocalDateTime.now().plusYears(1), imageUrl = null, imageDescription = "", status = Status.PUBLISHED)
     val newsDto2 = News(title = "Nyhet 2", description = "", body = "Dette er en nyhet", created = LocalDateTime.now(),
-        publishedFrom = LocalDateTime.now().minusDays(1), publishedTo = LocalDateTime.now().plusYears(1), image_url = null, imageDescription = "", status = Status.PUBLISHED)
+        publishedFrom = LocalDateTime.now().minusDays(1), publishedTo = LocalDateTime.now().plusYears(1), imageUrl = null, imageDescription = "", status = Status.PUBLISHED)
     val newsDto3 = News(title = "Nyhet 3", description = "", body = "Dette er en nyhet", created = LocalDateTime.now(),
-        publishedFrom = LocalDateTime.now().minusDays(1), publishedTo = LocalDateTime.now().plusYears(1), image_url = null, imageDescription = "", status = Status.PUBLISHED)
+        publishedFrom = LocalDateTime.now().minusDays(1), publishedTo = LocalDateTime.now().plusYears(1), imageUrl = null, imageDescription = "", status = Status.PUBLISHED)
 
 
     @BeforeEach
