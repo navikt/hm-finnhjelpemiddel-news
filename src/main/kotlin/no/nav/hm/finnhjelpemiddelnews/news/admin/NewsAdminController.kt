@@ -54,7 +54,7 @@ class NewsAdminController(
                             @QueryValue search: String? = null,
                            @QueryValue status: Status? = null,
                            @QueryValue publishingState: PublishingState? = null): HttpResponse<Page<NewsDto>> = try {
-        HttpResponse.ok(newsService.getNews(page, size, tag, search, active = false, sort = Sort.of(Sort.Order.desc("updated"), Sort.Order.desc("created")), status = status, publishingState = publishingState))
+        HttpResponse.ok(newsService.getNews(page, size, tag, search, sort = Sort.of(Sort.Order.desc("updated"), Sort.Order.desc("created")), status = status, publishingState = publishingState))
     } catch (exception: Exception) {
         LOG.error("Feil ved henting av news", exception)
         HttpResponse.notFound()

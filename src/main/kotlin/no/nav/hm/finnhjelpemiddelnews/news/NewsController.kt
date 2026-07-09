@@ -2,7 +2,6 @@ package no.nav.hm.finnhjelpemiddelnews.news
 
 import io.micronaut.data.model.Page
 import io.micronaut.data.model.Sort
-
 import io.micronaut.http.HttpResponse
 import io.micronaut.http.annotation.Controller
 import io.micronaut.http.annotation.Get
@@ -38,7 +37,7 @@ class NewsController(
                             @QueryValue(defaultValue = "6") size: Int,
                             @QueryValue tag: List<String>? = null,
                             @QueryValue search: String? = null, ): HttpResponse<Page<NewsDto>> = try {
-       HttpResponse.ok(newsService.getNews(page,size,tag,search, active =true, Sort.of(Sort.Order.desc("created")) ))
+       HttpResponse.ok(newsService.getNews(page, size, tag, search, Sort.of(Sort.Order.desc("created")), Status.PUBLISHED, PublishingState.ACTIVE))
     } catch (exception: Exception) {
         LOG.error("Feil ved henting av news", exception)
         HttpResponse.notFound()
@@ -46,7 +45,7 @@ class NewsController(
 
     @Get("/list")
     suspend fun getNewsBySize(@QueryValue(defaultValue = "5") size: Int): HttpResponse<List<NewsDto>> = try {
-        newsService.getNews(0, size, null, null, active = true).content
+        newsService.getNews(0, size, null, null, status = Status.PUBLISHED, publishingState = PublishingState.ACTIVE).content
             .let { HttpResponse.ok(it) }
     } catch (exception: Exception) {
         LOG.error("Feil ved henting av news", exception)

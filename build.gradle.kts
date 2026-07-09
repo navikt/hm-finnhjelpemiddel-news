@@ -39,6 +39,7 @@ dependencies {
     implementation("io.micronaut:micronaut-jackson-databind")
 
     implementation("io.micronaut.data:micronaut-data-jdbc")
+    compileOnly("jakarta.persistence:jakarta.persistence-api:3.1.0")
     implementation("io.micronaut.flyway:micronaut-flyway")
     implementation("io.micronaut.sql:micronaut-jdbc-hikari")
     runtimeOnly("org.flywaydb:flyway-database-postgresql")

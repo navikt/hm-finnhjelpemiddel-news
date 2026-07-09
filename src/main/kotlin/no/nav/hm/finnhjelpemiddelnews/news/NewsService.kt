@@ -3,7 +3,10 @@ package no.nav.hm.finnhjelpemiddelnews.news
 import io.micronaut.data.model.Page
 import io.micronaut.data.model.Pageable
 import io.micronaut.data.model.Sort
+import io.micronaut.data.repository.jpa.criteria.PredicateSpecification
 import jakarta.inject.Singleton
+import java.time.LocalDateTime
+import java.util.UUID
 
 @Singleton
 class NewsService(private val newsRepository: NewsRepository,
@@ -14,41 +17,71 @@ class NewsService(private val newsRepository: NewsRepository,
         size: Int,
         tag: List<String>?,
         search: String?,
-        active: Boolean,
         sort: Sort = Sort.of(Sort.Order.desc("created")),
         status: Status? = null,
         publishingState: PublishingState? = null,
     ): Page<NewsDto> {
-        val pageable = Pageable.from(page,size,sort)
+        val pageable = Pageable.from(page, size, sort)
+        val newsIds = tag?.let { getNewsIdsByTag(it) ?: return Page.empty() }
+        val newsPage = newsRepository.findAll(
+            filter(newsIds, search?.let { "%$it%" }, status, publishingState), pageable
+        )
 
-        val newsPage = when {
-            tag != null && search != null -> {
-                val tagsIds = tagsRepository.findByTagIn(tag).map { it.id }
-                if (tagsIds.isEmpty()) return Page.empty()
-                val newsIds = newsTagsRepository.findByIdTagIdIn(tagsIds).map { it.id.newsId }.distinct()
-                if (newsIds.isEmpty()) return Page.empty()
-                newsRepository.searchAllByIds(newsIds, "%$search%", pageable, active, status, publishingState)
-
-            }
-            tag != null -> {
-                val tagIds = tagsRepository.findByTagIn(tag).map { it.id }
-                if (tagIds.isEmpty()) return Page.empty()
-                val newsIds = newsTagsRepository.findByIdTagIdIn(tagIds).map { it.id.newsId }.distinct()
-                if (newsIds.isEmpty()) return Page.empty()
-                newsRepository.findAllByIds(newsIds, pageable, active, status, publishingState)
-            }
-            search != null -> newsRepository.searchAll("%$search%", pageable, active, status, publishingState)
-            else -> newsRepository.findAllPaged(pageable, active, status, publishingState)
-        }
-
-        val newsIds = newsPage.content.map { it.id }
-        val tagsByNewsId = newsTagsRepository.findByIdNewsIdIn(newsIds).groupBy { it.id.newsId }
+        val tagsByNewsId = newsTagsRepository.findByIdNewsIdIn(newsPage.content.map { it.id }).groupBy { it.id.newsId }
         val allTagNames = tagsRepository.findByIdIn(tagsByNewsId.values.flatten().map { it.id.tagId }).associateBy { it.id }
-        val newsDtos = newsPage.content.map { news ->
-            val tags = tagsByNewsId[news.id]?.map { allTagNames[it.id.tagId]?.tag ?: "" } ?: emptyList()
-            news.toDto(tags)
+        val dtos = newsPage.content.map { news ->
+            news.toDto(tagsByNewsId[news.id]?.map { allTagNames[it.id.tagId]?.tag ?: "" } ?: emptyList())
         }
-        return Page.of(newsDtos, pageable, newsPage.totalSize)
-
+        return Page.of(dtos, pageable, newsPage.totalSize)
     }
+
+    private suspend fun getNewsIdsByTag(tags: List<String>): List<UUID>? {
+        val tagIds = tagsRepository.findByTagIn(tags).map { it.id }
+        if (tagIds.isEmpty()) return null
+        val ids = newsTagsRepository.findByIdTagIdIn(tagIds).map { it.id.newsId }.distinct()
+        return ids.ifEmpty { null }
+    }
+
+
+    fun withIds(ids: List<UUID>): PredicateSpecification<News> =
+        PredicateSpecification { root, _ -> root.get<UUID>("id").`in`(ids) }
+
+    fun withSearch(search: String): PredicateSpecification<News> =
+        PredicateSpecification { root, cb -> cb.or(
+            cb.like(cb.lower(root.get("title")), search.lowercase()),
+            cb.like(cb.lower(root.get("description")), search.lowercase()),
+        )}
+
+    fun withStatus(status: Status): PredicateSpecification<News> =
+        PredicateSpecification { root, cb -> cb.equal(root.get<Status>("status"), status) }
+
+    fun withPublishingState(state: PublishingState): PredicateSpecification<News> {
+        val now = LocalDateTime.now()
+        return when (state) {
+            PublishingState.UPCOMING -> PredicateSpecification { root, cb ->
+                cb.greaterThan(root.get("publishedFrom"), now)
+            }
+            PublishingState.ACTIVE -> PredicateSpecification { root, cb -> cb.and(
+                cb.lessThanOrEqualTo(root.get("publishedFrom"), now),
+                cb.greaterThanOrEqualTo(root.get("publishedTo"), now),
+            )}
+            PublishingState.EXPIRED -> PredicateSpecification { root, cb ->
+                cb.lessThan(root.get("publishedTo"), now)
+            }
+        }
+    }
+
+    fun filter(
+        ids: List<UUID>? = null,
+        search: String? = null,
+        status: Status? = null,
+        publishingState: PublishingState? = null,
+    ): PredicateSpecification<News>? =
+        listOfNotNull(
+            ids?.let { withIds(it) },
+            search?.let { withSearch(it) },
+            status?.let { withStatus(it) },
+            publishingState?.let { withPublishingState(it) },
+        ).reduceOrNull { acc, spec -> acc.and(spec) }
+
 }
