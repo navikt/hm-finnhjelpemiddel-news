@@ -46,28 +46,6 @@ class TagsAdminController(
         }
     }
 
-    @Post("/{tagId}/news/{newsId}")
-    fun linkTagToNews(tagId: UUID, newsId: UUID): HttpResponse<String> {
-        return try {
-            runBlocking { newsTagsRepository.save(NewsTags(NewsTagsId(tagId = tagId, newsId = newsId))) }
-            HttpResponse.ok("linked tag $tagId to news $newsId")
-        } catch (exception: Exception) {
-            LOG.error("Failed to link tag $tagId to news $newsId", exception)
-            HttpResponse.serverError()
-        }
-    }
-
-    @Delete("/{tagId}/news/{newsId}")
-    fun unlinkTagFromNews(tagId: UUID, newsId: UUID): HttpResponse<String> {
-        return try {
-            runBlocking { newsTagsRepository.deleteById(NewsTagsId(tagId = tagId, newsId = newsId)) }
-            HttpResponse.ok("unlinked tag $tagId from news $newsId")
-        } catch (exception: Exception) {
-            LOG.error("Failed to unlink tag $tagId from news $newsId", exception)
-            HttpResponse.serverError()
-        }
-    }
-
     @Put("/{id}")
     fun updateTag(
         @Body tagDto: CreateTagDto,

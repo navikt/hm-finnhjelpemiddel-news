@@ -20,7 +20,6 @@ import java.time.LocalDateTime
 @MicronautTest
 class TagsAdminControllerTest(
     private val tagsAdminController: TagsAdminController,
-    private val newsAdminController: NewsAdminController,
     private val tagsRepository: TagsRepository,
     private val newsRepository: NewsRepository,
 ) {
@@ -83,50 +82,6 @@ class TagsAdminControllerTest(
         }
     }
 
-    @Test
-    fun linkTagTest() {
-        runBlocking {
-            val tagId = tagsAdminController.createTags(CreateTagDto(tag = "hjelpemiddel")).body()
-
-            val linkResponse = tagsAdminController.linkTagToNews(tagId, news.id)
-            linkResponse.status shouldBe HttpStatus.OK
-
-            val tagsForNews = tagsAdminController.getTagsByNewsId(news.id)
-            tagsForNews.status shouldBe HttpStatus.OK
-            tagsForNews.body() shouldContain "hjelpemiddel"
-        }
-    }
-
-    @Test
-    fun unlinkTagTest() {
-        runBlocking {
-            val tagId = tagsAdminController.createTags(CreateTagDto(tag = "fjernmeg")).body()
-            tagsAdminController.linkTagToNews(tagId, news.id)
-
-            tagsAdminController.unlinkTagFromNews(tagId, news.id)
-
-            val tagsForNews = tagsAdminController.getTagsByNewsId(news.id)
-            tagsForNews.status shouldBe HttpStatus.OK
-            (tagsForNews.body() ?: emptyList()) shouldNotContain "fjernmeg"
-        }
-    }
-
-    @Test
-    fun returnTagsOnNewsTest() {
-        runBlocking {
-            val newsId = newsAdminController.createNews(
-                CreateNewsDto(title = "Nyhet med tags", description = "", body = "Innhold",
-                    publishedFrom = LocalDateTime.now(), publishedTo = LocalDateTime.now(), image_url = null, imageDescription = "", status = Status.PUBLISHED)
-            ).body()
-            val tagId = tagsAdminController.createTags(CreateTagDto(tag = "rullestol")).body()
-            tagsAdminController.linkTagToNews(tagId, newsId)
-
-            val tagsForNews = tagsAdminController.getTagsByNewsId(newsId)
-
-            tagsForNews.status shouldBe HttpStatus.OK
-            tagsForNews.body() shouldContain "rullestol"
-        }
-    }
 
     @Test
     fun listAllTagsTest() {
