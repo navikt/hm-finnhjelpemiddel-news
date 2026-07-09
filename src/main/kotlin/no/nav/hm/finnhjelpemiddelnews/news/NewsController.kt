@@ -37,7 +37,7 @@ class NewsController(
                             @QueryValue(defaultValue = "6") size: Int,
                             @QueryValue tag: List<String>? = null,
                             @QueryValue search: String? = null, ): HttpResponse<Page<NewsDto>> = try {
-       HttpResponse.ok(newsService.getNews(page, size, tag, search, Sort.of(Sort.Order.desc("created")), Status.PUBLISHED, PublishingState.ACTIVE))
+       HttpResponse.ok(newsService.getNews(page, size, tag, search, Sort.of(Sort.Order.desc("published_from")), Status.PUBLISHED, PublishingState.ACTIVE))
     } catch (exception: Exception) {
         LOG.error("Feil ved henting av news", exception)
         HttpResponse.notFound()
