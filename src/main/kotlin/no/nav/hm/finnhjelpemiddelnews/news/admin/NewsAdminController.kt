@@ -55,8 +55,8 @@ class NewsAdminController(
                             @QueryValue tag: List<String>? = null,
                             @QueryValue search: String? = null,
                            @QueryValue status: Status? = null,
-                           @QueryValue publishingState: PublishingState? = null): HttpResponse<Page<NewsDto>> = try {
-        HttpResponse.ok(newsService.getNews(page, size, tag, search, sort = Sort.of(Sort.Order.desc("updated"), Sort.Order.desc("created")), status = status, publishingState = publishingState))
+                           @QueryValue publishingState: List<PublishingState>? = null): HttpResponse<Page<NewsDto>> = try {
+        HttpResponse.ok(newsService.getNews(page, size, tag, search, sort = Sort.of(Sort.Order.desc("updated"), Sort.Order.desc("created")), status = status, publishingStates = publishingState))
     } catch (exception: Exception) {
         LOG.error("Feil ved henting av news", exception)
         HttpResponse.notFound()
@@ -72,14 +72,6 @@ class NewsAdminController(
         HttpResponse.notFound()
     }
 
-    @Get("/list")
-    suspend fun getNewsBySize(@QueryValue(defaultValue = "5") size: Int): HttpResponse<List<NewsDto>> = try {
-        newsService.getNews(0, size, null, null, status = Status.PUBLISHED, publishingState = PublishingState.ACTIVE).content
-            .let { HttpResponse.ok(it) }
-    } catch (exception: Exception) {
-        LOG.error("Feil ved henting av news", exception)
-        HttpResponse.notFound()
-    }
 
     @Post("/")
      fun createNews(

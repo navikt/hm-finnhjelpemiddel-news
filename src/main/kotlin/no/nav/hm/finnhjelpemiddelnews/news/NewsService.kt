@@ -19,12 +19,12 @@ class NewsService(private val newsRepository: NewsRepository,
         search: String?,
         sort: Sort = Sort.of(Sort.Order.desc("created")),
         status: Status? = null,
-        publishingState: PublishingState? = null,
+        publishingStates: List<PublishingState>? = null,
     ): Page<NewsDto> {
         val pageable = Pageable.from(page, size, sort)
         val newsIds = tag?.let { getNewsIdsByTag(it) ?: return Page.empty() }
         val newsPage = newsRepository.findAll(
-            filter(newsIds, search?.let { "%$it%" }, status, publishingState), pageable
+            filter(newsIds, search?.let { "%$it%" }, status, publishingStates), pageable
         )
 
         val tagsByNewsId = newsTagsRepository.findByIdNewsIdIn(newsPage.content.map { it.id }).groupBy { it.id.newsId }
@@ -55,33 +55,35 @@ class NewsService(private val newsRepository: NewsRepository,
     fun withStatus(status: Status): PredicateSpecification<News> =
         PredicateSpecification { root, cb -> cb.equal(root.get<Status>("status"), status) }
 
-    fun withPublishingState(state: PublishingState): PredicateSpecification<News> {
+    fun withPublishingState(states: List<PublishingState>): PredicateSpecification<News> {
         val now = LocalDateTime.now()
-        return when (state) {
-            PublishingState.UPCOMING -> PredicateSpecification { root, cb ->
-                cb.greaterThan(root.get("publishedFrom"), now)
+        return states.map { state ->
+            when (state) {
+                PublishingState.UPCOMING -> PredicateSpecification<News> { root, cb ->
+                    cb.greaterThan(root.get("publishedFrom"), now)
+                }
+                PublishingState.ACTIVE -> PredicateSpecification<News> { root, cb -> cb.and(
+                    cb.lessThanOrEqualTo(root.get("publishedFrom"), now),
+                    cb.greaterThanOrEqualTo(root.get("publishedTo"), now),
+                )}
+                PublishingState.EXPIRED -> PredicateSpecification<News> { root, cb ->
+                    cb.lessThan(root.get("publishedTo"), now)
+                }
             }
-            PublishingState.ACTIVE -> PredicateSpecification { root, cb -> cb.and(
-                cb.lessThanOrEqualTo(root.get("publishedFrom"), now),
-                cb.greaterThanOrEqualTo(root.get("publishedTo"), now),
-            )}
-            PublishingState.EXPIRED -> PredicateSpecification { root, cb ->
-                cb.lessThan(root.get("publishedTo"), now)
-            }
-        }
+        }.reduce { acc, spec -> acc.or(spec) }
     }
 
     fun filter(
         ids: List<UUID>? = null,
         search: String? = null,
         status: Status? = null,
-        publishingState: PublishingState? = null,
+        publishingStates: List<PublishingState>? = null,
     ): PredicateSpecification<News>? =
         listOfNotNull(
             ids?.let { withIds(it) },
             search?.let { withSearch(it) },
             status?.let { withStatus(it) },
-            publishingState?.let { withPublishingState(it) },
+            publishingStates?.let { withPublishingState(it) },
         ).reduceOrNull { acc, spec -> acc.and(spec) }
 
 }

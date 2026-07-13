@@ -36,8 +36,9 @@ class NewsController(
     suspend fun getNewsList(@QueryValue(defaultValue = "0") page: Int,
                             @QueryValue(defaultValue = "6") size: Int,
                             @QueryValue tag: List<String>? = null,
-                            @QueryValue search: String? = null, ): HttpResponse<Page<PublicNewsDto>> = try {
-        val newsPage = newsService.getNews(page, size, tag, search, Sort.of(Sort.Order.desc("publishedFrom")), Status.PUBLISHED, PublishingState.ACTIVE)
+                            @QueryValue search: String? = null,
+                            @QueryValue publishingState: List<PublishingState>? = listOf(PublishingState.ACTIVE)): HttpResponse<Page<PublicNewsDto>> = try {
+        val newsPage = newsService.getNews(page, size, tag, search, Sort.of(Sort.Order.desc("publishedFrom")), Status.PUBLISHED, publishingState)
         HttpResponse.ok(newsPage.map { it.toPublicDto() })
     } catch (exception: Exception) {
         LOG.error("Feil ved henting av news: ${exception.message}", exception)
