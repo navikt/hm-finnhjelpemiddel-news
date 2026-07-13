@@ -10,10 +10,7 @@ import io.micronaut.http.annotation.Post
 import io.micronaut.http.annotation.Put
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.runBlocking
 import no.nav.hm.finnhjelpemiddelnews.news.CreateTagDto
-import no.nav.hm.finnhjelpemiddelnews.news.NewsTags
-import no.nav.hm.finnhjelpemiddelnews.news.NewsTagsId
 import no.nav.hm.finnhjelpemiddelnews.news.NewsTagsRepository
 import no.nav.hm.finnhjelpemiddelnews.news.TagDto
 import no.nav.hm.finnhjelpemiddelnews.news.Tags
@@ -31,14 +28,10 @@ class TagsAdminController(
     }
 
     @Post("/")
-    fun createTags(
-        @Body createTagDto: CreateTagDto
-    ): HttpResponse<UUID> {
+    suspend fun createTags(@Body createTagDto: CreateTagDto): HttpResponse<UUID> {
+        if (createTagDto.tag.isBlank()) return HttpResponse.badRequest()
         return try {
-            if (createTagDto.tag.isBlank()) return HttpResponse.badRequest()
-            val tag = runBlocking {
-                tagsRepository.save(Tags(tag = createTagDto.tag))
-            }
+            val tag = tagsRepository.save(Tags(tag = createTagDto.tag))
             HttpResponse.ok(tag.id)
         } catch (exception: Exception) {
             LOG.error("Failed to create new tag \"$createTagDto\"", exception)
@@ -47,35 +40,26 @@ class TagsAdminController(
     }
 
     @Put("/{id}")
-    fun updateTag(
-        @Body tagDto: CreateTagDto,
-        id: UUID
-    ): HttpResponse<String> {
-        try {
-            runBlocking {
-                val tag = tagsRepository.findById(id)
-                if (tag != null) {
-                    tagsRepository.update(tag.copy(tag = tagDto.tag))
-                } else throw Exception("Failed to find tag by id $id")
-            }
-            return HttpResponse.ok("updated $id")
+    suspend fun updateTag(@Body tagDto: CreateTagDto, id: UUID): HttpResponse<String> {
+        val tag = tagsRepository.findById(id) ?: return HttpResponse.notFound()
+        return try {
+            tagsRepository.update(tag.copy(tag = tagDto.tag))
+            HttpResponse.ok("updated $id")
         } catch (exception: Exception) {
             LOG.error("Failed to update tag \"$id\"", exception)
-            return HttpResponse.serverError()
+            HttpResponse.serverError()
         }
     }
 
     @Delete("/{id}")
-    fun deleteTag(id: UUID): HttpResponse<String> {
-        try {
-            runBlocking {
-                if (!tagsRepository.existsById(id)) return@runBlocking HttpResponse.badRequest<String>()
-                tagsRepository.deleteById(id)
-            }
-            return HttpResponse.ok("deleted $id")
+    suspend fun deleteTag(id: UUID): HttpResponse<String> {
+        if (!tagsRepository.existsById(id)) return HttpResponse.notFound()
+        return try {
+            tagsRepository.deleteById(id)
+            HttpResponse.ok("deleted $id")
         } catch (exception: Exception) {
             LOG.error("Failed to delete tag \"$id\"", exception)
-            return HttpResponse.serverError()
+            HttpResponse.serverError()
         }
     }
 

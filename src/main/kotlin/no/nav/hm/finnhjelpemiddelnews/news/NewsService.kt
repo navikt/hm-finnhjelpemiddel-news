@@ -43,6 +43,11 @@ class NewsService(private val newsRepository: NewsRepository,
     }
 
 
+    suspend fun fetchTagsForNews(newsId: UUID): List<String> {
+        val tagIds = newsTagsRepository.findByIdNewsId(newsId).map { it.id.tagId }
+        return if (tagIds.isEmpty()) emptyList() else tagsRepository.findByIdIn(tagIds).map { it.tag }
+    }
+
     fun withIds(ids: List<UUID>): PredicateSpecification<News> =
         PredicateSpecification { root, _ -> root.get<UUID>("id").`in`(ids) }
 

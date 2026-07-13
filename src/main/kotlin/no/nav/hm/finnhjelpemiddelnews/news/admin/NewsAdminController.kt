@@ -30,7 +30,6 @@ import no.nav.hm.finnhjelpemiddelnews.news.NewsTagsId
 import no.nav.hm.finnhjelpemiddelnews.news.NewsTagsRepository
 import no.nav.hm.finnhjelpemiddelnews.news.PublishingState
 import no.nav.hm.finnhjelpemiddelnews.news.Status
-import no.nav.hm.finnhjelpemiddelnews.news.TagsRepository
 import org.reactivestreams.Publisher
 import java.time.LocalDateTime
 import java.util.UUID
@@ -40,7 +39,6 @@ class NewsAdminController(
     private val newsService: NewsService,
     private val newsRepository: NewsRepository,
     private val newsTagsRepository: NewsTagsRepository,
-    private val tagsRepository: TagsRepository,
     private val mediaUploadService: MediaUploadService,
 ) {
 
@@ -64,7 +62,7 @@ class NewsAdminController(
     @Get("/{id}")
     suspend fun getNewsById(id: UUID): HttpResponse<NewsDto> = try {
         val news = newsRepository.findOne(id)
-        val tags = fetchTagsForNews(id)
+        val tags = newsService.fetchTagsForNews(id)
         HttpResponse.ok(news.toDto(tags))
     } catch (exception: Exception) {
         LOG.error("Feil ved henting av news", exception)
@@ -167,10 +165,5 @@ class NewsAdminController(
     suspend fun deleteMedia(newsId: UUID, uri: String): HttpResponse<MediaDTO> {
         LOG.info("Deleting media for news $newsId, uri: $uri")
         return HttpResponse.ok(mediaUploadService.deleteByOidAndUri(newsId, uri))
-    }
-
-    private suspend fun fetchTagsForNews(newsId: UUID): List<String> {
-        val tagIds = newsTagsRepository.findByIdNewsId(newsId).map { it.id.tagId }
-        return if (tagIds.isEmpty()) emptyList() else tagsRepository.findByIdIn(tagIds).map { it.tag }
     }
 }

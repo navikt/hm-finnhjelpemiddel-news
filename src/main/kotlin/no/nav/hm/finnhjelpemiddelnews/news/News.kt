@@ -52,7 +52,7 @@ data class CreateNewsDto(
 @Serdeable
 @Introspected
 data class NewsDto(
-    val id: UUID? = UUID.randomUUID(),
+    val id: UUID?,
     val title: String,
     val description: String?,
     val body: String,
@@ -75,7 +75,7 @@ data class NewsDto(
 @Serdeable
 @Introspected
 data class PublicNewsDto(
-    val id: UUID? = UUID.randomUUID(),
+    val id: UUID?,
     val title: String,
     val description: String?,
     val body: String,

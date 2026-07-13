@@ -15,8 +15,6 @@ import org.slf4j.LoggerFactory
 class NewsController(
     private val newsService: NewsService,
     private val newsRepository: NewsRepository,
-    private val tagsRepository: TagsRepository,
-    private val newsTagsRepository: NewsTagsRepository
 ) {
     companion object {
         private val LOG = LoggerFactory.getLogger(NewsController::class.java)
@@ -25,7 +23,7 @@ class NewsController(
     @Get("/{id}")
     suspend fun getNewsById(id: UUID): HttpResponse<PublicNewsDto> = try {
         val news = newsRepository.findOne(id)
-        val tags = fetchTagsForNews(id)
+        val tags = newsService.fetchTagsForNews(id)
         HttpResponse.ok(news.toPublicDto(tags))
     } catch (exception: Exception) {
         LOG.error("Feil ved henting av news", exception)
@@ -44,11 +42,5 @@ class NewsController(
     } catch (exception: Exception) {
         LOG.error("Feil ved henting av news: ${exception.message}", exception)
         HttpResponse.notFound()
-    }
-
-
-    private suspend fun fetchTagsForNews(newsId: UUID): List<String> {
-        val tagIds = newsTagsRepository.findByIdNewsId(newsId).map { it.id.tagId }
-        return if (tagIds.isEmpty()) emptyList() else tagsRepository.findByIdIn(tagIds).map { it.tag }
     }
 }
