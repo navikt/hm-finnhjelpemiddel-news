@@ -17,7 +17,6 @@ import io.micronaut.http.multipart.CompletedFileUpload
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.asFlow
-import kotlinx.coroutines.runBlocking
 import no.nav.hm.finnhjelpemiddelnews.media.MediaDTO
 import no.nav.hm.finnhjelpemiddelnews.media.MediaUploadService
 import no.nav.hm.finnhjelpemiddelnews.media.ObjectType
@@ -82,11 +81,10 @@ class NewsAdminController(
     }
 
     @Post("/")
-     fun createNews(
+    suspend fun createNews(
         @Body createNewsDto: CreateNewsDto): HttpResponse<UUID> {
-        return try {
             if (createNewsDto.title.isBlank()) return HttpResponse.badRequest()
-            val news = runBlocking {
+            return try {
                 val now = LocalDateTime.now()
                 val saved = newsRepository.save(News(
                     title = createNewsDto.title,
@@ -105,10 +103,7 @@ class NewsAdminController(
                     NewsTags(NewsTagsId(tagId = UUID.fromString(tagId), newsId = saved.id))
                 }
                 newsTagsRepository.saveAll(tagLinks).toList()
-                saved
-
-            }
-            HttpResponse.ok(news.id)
+                HttpResponse.ok(saved.id)
         } catch (exception: Exception) {
             LOG.error("Failed to create new news \"$createNewsDto\"", exception)
             HttpResponse.serverError()
@@ -116,57 +111,49 @@ class NewsAdminController(
     }
 
     @Put("/{id}")
-     fun updateNews(
+    suspend fun updateNews(
         @Body newsDto: CreateNewsDto,
-        id: UUID
-        ): HttpResponse<String> {
-        try {
-            runBlocking {
-                val news = newsRepository.findById(id)
-                if(news != null) {
-                  val updatedNews = news.copy(
-                      title = newsDto.title,
-                      description = newsDto.description,
-                      body = newsDto.body,
-                      updated = LocalDateTime.now(),
-                      publishedFrom = newsDto.publishedFrom,
-                      publishedTo = newsDto.publishedTo,
-                      imageUrl = newsDto.imageUrl,
-                      imageDescription = newsDto.imageDescription,
-                      status = newsDto.status,
-                      comment = newsDto.comment,
-                  )
-                    newsTagsRepository.deleteByIdNewsId(updatedNews.id)
-                    val tagLinks = newsDto.tags.map { tagId ->
-                        NewsTags(NewsTagsId(tagId = UUID.fromString(tagId), newsId = updatedNews.id))
-                    }
-                    if (tagLinks.isNotEmpty()) newsTagsRepository.saveAll(tagLinks).toList()
-                  newsRepository.update(updatedNews)
-                } else throw Exception("Failed to find news by id $id")
+        id: UUID,
+    ): HttpResponse<String> {
+        val news = newsRepository.findById(id) ?: return HttpResponse.notFound()
+        return try {
+            val updatedNews = news.copy(
+                title = newsDto.title,
+                description = newsDto.description,
+                body = newsDto.body,
+                updated = LocalDateTime.now(),
+                publishedFrom = newsDto.publishedFrom,
+                publishedTo = newsDto.publishedTo,
+                imageUrl = newsDto.imageUrl,
+                imageDescription = newsDto.imageDescription,
+                status = newsDto.status,
+                comment = newsDto.comment,
+            )
+            newsTagsRepository.deleteByIdNewsId(updatedNews.id)
+            val tagLinks = newsDto.tags.map { tagId ->
+                NewsTags(NewsTagsId(tagId = UUID.fromString(tagId), newsId = updatedNews.id))
             }
-            return HttpResponse.ok("updated $id")
+            if (tagLinks.isNotEmpty()) newsTagsRepository.saveAll(tagLinks).toList()
+            newsRepository.update(updatedNews)
+            HttpResponse.ok("updated $id")
         } catch (exception: Exception) {
             LOG.error("Failed to update news \"$id\"", exception)
-            return HttpResponse.serverError()
+            HttpResponse.serverError()
         }
-
     }
 
     @Delete("/{id}")
-    fun deleteNews(
-        id: UUID
-    ): HttpResponse<String> {
-        try {
-            runBlocking {
-                if (!newsRepository.existsById(id)) return@runBlocking HttpResponse.badRequest<String>()
-                newsRepository.deleteById(id)
-            }
-            return HttpResponse.ok("deleted $id")
+    suspend fun deleteNews(id: UUID): HttpResponse<String> {
+        if (!newsRepository.existsById(id)) return HttpResponse.notFound()
+        return try {
+            newsRepository.deleteById(id)
+            HttpResponse.ok("deleted $id")
         } catch (exception: Exception) {
             LOG.error("Failed to delete news \"$id\"", exception)
-            return HttpResponse.serverError()
+            HttpResponse.serverError()
         }
     }
+
     @Post(
         value = "/{newsId}/media",
         consumes = [MULTIPART_FORM_DATA],
