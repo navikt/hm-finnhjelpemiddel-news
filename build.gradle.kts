@@ -21,7 +21,7 @@ val kotestVersion = "5.9.1"
 val micrometerRegistryPrometheusVersion = "1.16.0"
 val log4jVersion = "2.25.4"
 val mockkVersion = "1.14.2"
-val postgresVersion = "42.7.11"
+val postgresVersion = "42.7.12"
 val logbackEncoderVersion = "8.0"
 
 dependencies {
