@@ -1,5 +1,4 @@
 name: build-deploy-dev
-
 on:
   push:
     paths-ignore:
@@ -9,7 +8,6 @@ on:
       - "CODEOWNERS"
     branches:
       - main
-
 
 jobs:
   call-workflow:
@@ -23,6 +21,6 @@ jobs:
       NAIS_RESOURCE: ".nais/nais.yml"
       NAIS_VARS: ".nais/nais-dev.json"
       JAVA_VERSION: 25
-      CODEQL_ENABLED: false
+      CODEQL_ENABLED: true
       DRAFTS_MAX: 50
     secrets: inherit
