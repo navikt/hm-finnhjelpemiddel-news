@@ -4,6 +4,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.micronaut.http.HttpStatus
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest
+import java.time.LocalDateTime
 import kotlinx.coroutines.runBlocking
 import no.nav.hm.finnhjelpemiddelnews.news.CreateNewsDto
 import no.nav.hm.finnhjelpemiddelnews.news.News
@@ -12,16 +13,24 @@ import no.nav.hm.finnhjelpemiddelnews.news.NewsRepository
 import no.nav.hm.finnhjelpemiddelnews.news.Status
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDateTime
 
 @MicronautTest
-class NewsAdminControllerTest (
+class NewsAdminControllerTest(
     private val newsController: NewsController,
     private val newsRepository: NewsRepository,
-    private val newsAdminController: NewsAdminController)
-{
-    val newsDto = News(title = "Nyhet 1", description = "Deez nuts", body = "Dette er en nyhet", created = LocalDateTime.now(),
-        publishedFrom = LocalDateTime.now(), publishedTo = LocalDateTime.now(), imageUrl = null, imageDescription = "", status = Status.PUBLISHED)
+    private val newsAdminController: NewsAdminController
+) {
+    val newsDto = News(
+        title = "Nyhet 1",
+        description = "Deez nuts",
+        body = "Dette er en nyhet",
+        created = LocalDateTime.now(),
+        publishedFrom = LocalDateTime.now(),
+        publishedTo = LocalDateTime.now(),
+        imageUrl = null,
+        imageDescription = "",
+        status = Status.PUBLISHED
+    )
 
     @BeforeEach
     fun init() = runBlocking {
@@ -34,7 +43,7 @@ class NewsAdminControllerTest (
         runBlocking {
             val responseNewsDto = newsController.getNewsById(newsDto.id)
             responseNewsDto.status shouldBe HttpStatus.OK
-            responseNewsDto.body().body shouldBe newsDto.body
+            responseNewsDto.body()?.body shouldBe newsDto.body
 
             newsAdminController.deleteNews(newsDto.id)
             val res = newsController.getNewsById(newsDto.id)
@@ -45,9 +54,18 @@ class NewsAdminControllerTest (
     @Test
     fun postTest() {
         runBlocking {
-            val dto = CreateNewsDto(title = "Nyhet 2", description = "ohio", body = "Dette er ny nyhet", publishedFrom = LocalDateTime.now(),
-                publishedTo = LocalDateTime.now(), imageUrl = null, imageDescription = "", tags = emptyList(), status = Status.PUBLISHED)
-            val createdId = newsAdminController.createNews(dto).body()
+            val dto = CreateNewsDto(
+                title = "Nyhet 2",
+                description = "ohio",
+                body = "Dette er ny nyhet",
+                publishedFrom = LocalDateTime.now(),
+                publishedTo = LocalDateTime.now(),
+                imageUrl = null,
+                imageDescription = "",
+                tags = emptyList(),
+                status = Status.PUBLISHED
+            )
+            val createdId = newsAdminController.createNews(dto).body()!!
 
             val created = newsRepository.findById(createdId)
             created?.body shouldBe dto.body
@@ -57,26 +75,44 @@ class NewsAdminControllerTest (
     @Test
     fun putTest() {
         runBlocking {
-            val updatedNews = CreateNewsDto(title = "Nyhet oppdatering", description = "oniichan", body = "Dette er en oppdatering",
-                publishedFrom = LocalDateTime.now(), publishedTo = LocalDateTime.now(), imageUrl = null, imageDescription = "", tags = emptyList(), status = Status.PUBLISHED)
+            val updatedNews = CreateNewsDto(
+                title = "Nyhet oppdatering",
+                description = "oniichan",
+                body = "Dette er en oppdatering",
+                publishedFrom = LocalDateTime.now(),
+                publishedTo = LocalDateTime.now(),
+                imageUrl = null,
+                imageDescription = "",
+                tags = emptyList(),
+                status = Status.PUBLISHED
+            )
             val response = newsAdminController.updateNews(updatedNews, newsDto.id)
             response.status shouldBe HttpStatus.OK
 
             val fetched = newsController.getNewsById(newsDto.id)
             fetched.status shouldBe HttpStatus.OK
-            fetched.body().body shouldBe "Dette er en oppdatering"
-            fetched.body().description shouldBe "oniichan"
-            fetched.body().title shouldBe "Nyhet oppdatering"
-            fetched.body().updated shouldNotBe null
+            fetched.body()?.body shouldBe "Dette er en oppdatering"
+            fetched.body()?.description shouldBe "oniichan"
+            fetched.body()?.title shouldBe "Nyhet oppdatering"
+            fetched.body()?.updated shouldNotBe null
         }
     }
 
     @Test
     fun badDeleteTest() {
         runBlocking {
-            val dto = CreateNewsDto(title = "Nyhet 3",description = "daddy", body = "Dette er ny nyhet", publishedFrom = LocalDateTime.now(),
-                publishedTo = LocalDateTime.now(), imageUrl = null, imageDescription = "", tags = emptyList(), status = Status.PUBLISHED)
-            val createdNewsId = newsAdminController.createNews(dto).body()
+            val dto = CreateNewsDto(
+                title = "Nyhet 3",
+                description = "daddy",
+                body = "Dette er ny nyhet",
+                publishedFrom = LocalDateTime.now(),
+                publishedTo = LocalDateTime.now(),
+                imageUrl = null,
+                imageDescription = "",
+                tags = emptyList(),
+                status = Status.PUBLISHED
+            )
+            val createdNewsId = newsAdminController.createNews(dto).body()!!
 
             newsAdminController.deleteNews(createdNewsId)
 
@@ -89,8 +125,17 @@ class NewsAdminControllerTest (
     @Test
     fun badPostTest() {
         runBlocking {
-            val dto = CreateNewsDto(title = "", description = "", body = "Dette er ny nyhet", publishedFrom = LocalDateTime.now(),
-                publishedTo = LocalDateTime.now(), imageUrl = null, imageDescription = "", tags = emptyList(), status = Status.PUBLISHED)
+            val dto = CreateNewsDto(
+                title = "",
+                description = "",
+                body = "Dette er ny nyhet",
+                publishedFrom = LocalDateTime.now(),
+                publishedTo = LocalDateTime.now(),
+                imageUrl = null,
+                imageDescription = "",
+                tags = emptyList(),
+                status = Status.PUBLISHED
+            )
             val createdNewsId = newsAdminController.createNews(dto)
 
             createdNewsId.status shouldBe HttpStatus.BAD_REQUEST

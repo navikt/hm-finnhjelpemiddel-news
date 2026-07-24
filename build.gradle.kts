@@ -4,20 +4,19 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    id("org.jetbrains.kotlin.jvm") version "2.1.21"
-    id("org.jetbrains.kotlin.kapt") version "2.1.21"
-    id("org.jetbrains.kotlin.plugin.allopen") version "2.1.21"
+    kotlin("jvm") version "2.3.21"
+    kotlin("kapt") version "2.3.21"
+    kotlin("plugin.allopen") version "2.3.21"
     id("com.gradleup.shadow") version "9.4.1"
-    id("io.micronaut.application") version "4.6.2"
-    id("io.micronaut.aot") version "4.6.1"
+    id("io.micronaut.application") version "5.0.0"
+    id("io.micronaut.aot") version "5.0.0"
 }
 
 group = "no.nav.hm"
-version = properties["version"] ?: "local-build"
 
-val kotlinVersion = project.properties["kotlinVersion"]
+val kotlinVersion = providers.gradleProperty("kotlinVersion").get()
 val poiVersion = "5.5.0"
-val jvmTarget = "17"
+val jvmTarget = "25"
 val kotestVersion = "5.9.1"
 val micrometerRegistryPrometheusVersion = "1.16.0"
 val log4jVersion = "2.25.4"
@@ -36,7 +35,6 @@ dependencies {
     kapt("io.micronaut.serde:micronaut-serde-processor")
     implementation("io.micronaut.kotlin:micronaut-kotlin-runtime")
     implementation("io.micronaut.serde:micronaut-serde-jackson")
-    implementation("io.micronaut:micronaut-jackson-databind")
 
     implementation("io.micronaut.data:micronaut-data-jdbc")
     compileOnly("jakarta.persistence:jakarta.persistence-api:3.1.0")
@@ -63,15 +61,13 @@ dependencies {
     implementation("io.micronaut.micrometer:micronaut-micrometer-registry-prometheus")
     implementation("io.micronaut:micronaut-management")
 
-    testImplementation("org.testcontainers:junit-jupiter")
+    testImplementation("org.testcontainers:testcontainers-junit-jupiter")
     testImplementation("org.testcontainers:testcontainers")
-    testImplementation("org.testcontainers:postgresql")
+    testImplementation("org.testcontainers:testcontainers-postgresql")
     testImplementation("io.kotest:kotest-assertions-core-jvm:$kotestVersion")
     testImplementation("io.mockk:mockk:$mockkVersion")
-
-
+    testImplementation(kotlin("test"))
 }
-
 
 application {
     mainClass = "no.nav.hm.finnhjelpemiddelnews.Application"

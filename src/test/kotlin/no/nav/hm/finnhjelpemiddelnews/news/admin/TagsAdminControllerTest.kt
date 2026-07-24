@@ -1,13 +1,12 @@
 package no.nav.hm.finnhjelpemiddelnews.news.admin
 
 import io.kotest.matchers.collections.shouldContain
-import io.kotest.matchers.collections.shouldNotContain
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.micronaut.http.HttpStatus
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest
+import java.time.LocalDateTime
 import kotlinx.coroutines.runBlocking
-import no.nav.hm.finnhjelpemiddelnews.news.CreateNewsDto
 import no.nav.hm.finnhjelpemiddelnews.news.CreateTagDto
 import no.nav.hm.finnhjelpemiddelnews.news.News
 import no.nav.hm.finnhjelpemiddelnews.news.NewsRepository
@@ -15,7 +14,6 @@ import no.nav.hm.finnhjelpemiddelnews.news.Status
 import no.nav.hm.finnhjelpemiddelnews.news.TagsRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDateTime
 
 @MicronautTest
 class TagsAdminControllerTest(
@@ -27,7 +25,8 @@ class TagsAdminControllerTest(
         title = "Testnyheten", description = "Test", body = "Innhold",
         created = LocalDateTime.now(), publishedFrom = LocalDateTime.now(),
         publishedTo = LocalDateTime.now(), imageUrl = null, imageDescription = "",
-        status = Status.PUBLISHED)
+        status = Status.PUBLISHED
+    )
 
     @BeforeEach
     fun init() = runBlocking {
@@ -43,7 +42,7 @@ class TagsAdminControllerTest(
             response.status shouldBe HttpStatus.OK
             response.body() shouldNotBe null
 
-            val saved = tagsRepository.findById(response.body())
+            val saved = tagsRepository.findById(response.body()!!)
             saved shouldNotBe null
             saved!!.tag shouldBe "tilskudd"
         }
@@ -61,7 +60,7 @@ class TagsAdminControllerTest(
     @Test
     fun updateTag() {
         runBlocking {
-            val tagId = tagsAdminController.createTags(CreateTagDto(tag = "gammel")).body()
+            val tagId = tagsAdminController.createTags(CreateTagDto(tag = "gammel")).body()!!
 
             val response = tagsAdminController.updateTag(CreateTagDto(tag = "ny"), tagId)
 
@@ -73,7 +72,7 @@ class TagsAdminControllerTest(
     @Test
     fun deleteTag() {
         runBlocking {
-            val tagId = tagsAdminController.createTags(CreateTagDto(tag = "slettemeg")).body()
+            val tagId = tagsAdminController.createTags(CreateTagDto(tag = "slettemeg")).body()!!
             tagsRepository.existsById(tagId) shouldBe true
 
             tagsAdminController.deleteTag(tagId)
@@ -92,8 +91,8 @@ class TagsAdminControllerTest(
             val response = tagsAdminController.getTagsList()
 
             response.status shouldBe HttpStatus.OK
-            response.body().map { it.tag } shouldContain "listetest1"
-            response.body().map { it.tag } shouldContain "listetest2"
+            response.body()?.map { it.tag }?.shouldContain("listetest1")
+            response.body()?.map { it.tag }?.shouldContain("listetest2")
         }
     }
 }
