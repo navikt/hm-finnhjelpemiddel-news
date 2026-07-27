@@ -5,34 +5,30 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm") version "2.3.21"
-    kotlin("kapt") version "2.3.21"
     kotlin("plugin.allopen") version "2.3.21"
     id("com.gradleup.shadow") version "9.4.1"
     id("io.micronaut.application") version "5.0.0"
     id("io.micronaut.aot") version "5.0.0"
+    id("com.google.devtools.ksp") version "2.3.10"
 }
 
 group = "no.nav.hm"
 
-val kotlinVersion = providers.gradleProperty("kotlinVersion").get()
+val micronautVersion = "5.0.6"
 val poiVersion = "5.5.0"
 val jvmTarget = "25"
-val kotestVersion = "5.9.1"
-val micrometerRegistryPrometheusVersion = "1.16.0"
-val log4jVersion = "2.25.4"
-val mockkVersion = "1.14.2"
 val postgresVersion = "42.7.12"
-val logbackEncoderVersion = "8.0"
+val logbackEncoderVersion = "9.0"
 
 dependencies {
     constraints {
         implementation("org.codehaus.plexus:plexus-utils:4.0.3")
-        implementation("org.apache.logging.log4j:log4j-core:2.25.4")
     }
-    kapt("io.micronaut.data:micronaut-data-processor")
-    kapt("io.micronaut:micronaut-http-validation")
-    kapt("io.micronaut.openapi:micronaut-openapi")
-    kapt("io.micronaut.serde:micronaut-serde-processor")
+
+    ksp("io.micronaut.data:micronaut-data-processor")
+    ksp("io.micronaut:micronaut-http-validation")
+    ksp("io.micronaut.openapi:micronaut-openapi")
+    ksp("io.micronaut.serde:micronaut-serde-processor")
     implementation("io.micronaut.kotlin:micronaut-kotlin-runtime")
     implementation("io.micronaut.serde:micronaut-serde-jackson")
 
@@ -43,8 +39,7 @@ dependencies {
     runtimeOnly("org.flywaydb:flyway-database-postgresql")
     runtimeOnly("org.postgresql:postgresql:${postgresVersion}")
 
-    implementation("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:${kotlinVersion}")
+    implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactive")
     implementation("org.apache.poi:poi:$poiVersion")
@@ -54,7 +49,6 @@ dependencies {
     runtimeOnly("ch.qos.logback:logback-classic")
     runtimeOnly("org.yaml:snakeyaml")
 
-    implementation("org.apache.logging.log4j:log4j-core:$log4jVersion")
     api("net.logstash.logback:logstash-logback-encoder:${logbackEncoderVersion}")
 
     implementation("io.micronaut.micrometer:micronaut-micrometer-core")
@@ -64,8 +58,8 @@ dependencies {
     testImplementation("org.testcontainers:testcontainers-junit-jupiter")
     testImplementation("org.testcontainers:testcontainers")
     testImplementation("org.testcontainers:testcontainers-postgresql")
-    testImplementation("io.kotest:kotest-assertions-core-jvm:$kotestVersion")
-    testImplementation("io.mockk:mockk:$mockkVersion")
+    testImplementation("io.kotest:kotest-assertions-core-jvm")
+    testImplementation("io.mockk:mockk")
     testImplementation(kotlin("test"))
 }
 
@@ -103,6 +97,7 @@ tasks.test {
 }
 
 micronaut {
+    version.set(micronautVersion)
     runtime("netty")
     testRuntime("junit5")
     processing {
