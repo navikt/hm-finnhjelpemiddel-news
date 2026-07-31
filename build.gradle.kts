@@ -33,7 +33,7 @@ dependencies {
     implementation("io.micronaut.serde:micronaut-serde-jackson")
 
     implementation("io.micronaut.data:micronaut-data-jdbc")
-    compileOnly("jakarta.persistence:jakarta.persistence-api:3.1.0")
+    compileOnly("jakarta.persistence:jakarta.persistence-api:3.2.0")
     implementation("io.micronaut.flyway:micronaut-flyway")
     implementation("io.micronaut.sql:micronaut-jdbc-hikari")
     runtimeOnly("org.flywaydb:flyway-database-postgresql")
