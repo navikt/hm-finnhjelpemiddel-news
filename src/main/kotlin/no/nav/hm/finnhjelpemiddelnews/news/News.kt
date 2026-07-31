@@ -17,8 +17,8 @@ data class News(
     val body: String,
     val created: LocalDateTime,
     val updated: LocalDateTime? = null,
-    val publishedFrom: LocalDateTime,
-    val publishedTo: LocalDateTime,
+    val publishedFrom: LocalDateTime, // fra og med
+    val publishedTo: LocalDateTime, // til og med
     val imageUrl: String?,
     val imageDescription: String?,
     val status: Status,

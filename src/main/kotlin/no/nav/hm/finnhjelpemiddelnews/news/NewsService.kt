@@ -5,6 +5,7 @@ import io.micronaut.data.model.Pageable
 import io.micronaut.data.model.Sort
 import io.micronaut.data.repository.jpa.criteria.PredicateSpecification
 import jakarta.inject.Singleton
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -61,7 +62,7 @@ class NewsService(private val newsRepository: NewsRepository,
         PredicateSpecification { root, cb -> cb.equal(root.get<Status>("status"), status) }
 
     fun withPublishingState(states: List<PublishingState>): PredicateSpecification<News> {
-        val now = LocalDateTime.now()
+        val now = LocalDate.now().atStartOfDay() // hack for riktig sammenligning, fra og til datoene blir satt til midnatt
         return states.map { state ->
             when (state) {
                 PublishingState.UPCOMING -> PredicateSpecification<News> { root, cb ->
