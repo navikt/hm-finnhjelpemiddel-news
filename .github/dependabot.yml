@@ -21,3 +21,16 @@ updates:
       timezone: "Europe/Oslo"
     cooldown:
       default-days: 7
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: daily
+    cooldown:
+      default-days: 7
+    groups:
+      minor:
+        update-types:
+          - "minor"
+      major:
+        update-types:
+          - "major"
