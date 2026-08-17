@@ -4,7 +4,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "2.3.21"
+    kotlin("jvm") version "2.4.10"
     kotlin("plugin.allopen") version "2.3.21"
     id("com.gradleup.shadow") version "9.4.1"
     id("io.micronaut.application") version "5.0.0"
