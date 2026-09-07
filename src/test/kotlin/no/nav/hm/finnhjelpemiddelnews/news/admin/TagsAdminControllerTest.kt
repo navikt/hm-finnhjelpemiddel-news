@@ -37,14 +37,14 @@ class TagsAdminControllerTest(
     @Test
     fun createTagTest() {
         runBlocking {
-            val response = tagsAdminController.createTags(CreateTagDto(tag = "tilskudd"))
+            val response = tagsAdminController.createTags(CreateTagDto(tag = "Fra hjelpemiddelområdet"))
 
             response.status shouldBe HttpStatus.OK
             response.body() shouldNotBe null
 
             val saved = tagsRepository.findById(response.body()!!)
             saved shouldNotBe null
-            saved!!.tag shouldBe "tilskudd"
+            saved!!.tag shouldBe "Fra hjelpemiddelområdet"
         }
     }
 
