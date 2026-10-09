@@ -22,7 +22,7 @@ val logbackEncoderVersion = "9.0"
 
 dependencies {
     constraints {
-        implementation("org.codehaus.plexus:plexus-utils:4.0.3")
+        implementation("org.codehaus.plexus:plexus-utils:4.1.0")
     }
 
     ksp("io.micronaut.data:micronaut-data-processor")
