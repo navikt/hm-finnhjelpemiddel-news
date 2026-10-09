@@ -6,17 +6,21 @@ import io.micronaut.http.HttpResponse
 import io.micronaut.http.MediaType.APPLICATION_JSON
 import io.micronaut.http.MediaType.MULTIPART_FORM_DATA
 import io.micronaut.http.annotation.Body
-import org.slf4j.LoggerFactory
 import io.micronaut.http.annotation.Controller
 import io.micronaut.http.annotation.Delete
 import io.micronaut.http.annotation.Get
+import io.micronaut.http.annotation.Header
 import io.micronaut.http.annotation.Post
 import io.micronaut.http.annotation.Put
 import io.micronaut.http.annotation.QueryValue
 import io.micronaut.http.multipart.CompletedFileUpload
+import java.time.LocalDateTime
+import java.util.UUID
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.asFlow
+import no.nav.hm.finnhjelpemiddelnews.auth.AuthBody
+import no.nav.hm.finnhjelpemiddelnews.auth.AzureAdUserClient
 import no.nav.hm.finnhjelpemiddelnews.media.MediaDTO
 import no.nav.hm.finnhjelpemiddelnews.media.MediaUploadService
 import no.nav.hm.finnhjelpemiddelnews.media.ObjectType
@@ -31,8 +35,7 @@ import no.nav.hm.finnhjelpemiddelnews.news.NewsTagsRepository
 import no.nav.hm.finnhjelpemiddelnews.news.PublishingState
 import no.nav.hm.finnhjelpemiddelnews.news.Status
 import org.reactivestreams.Publisher
-import java.time.LocalDateTime
-import java.util.UUID
+import org.slf4j.LoggerFactory
 
 @Controller("/admin/news")
 class NewsAdminController(
@@ -40,6 +43,7 @@ class NewsAdminController(
     private val newsRepository: NewsRepository,
     private val newsTagsRepository: NewsTagsRepository,
     private val mediaUploadService: MediaUploadService,
+    private val azureAdUserClient: AzureAdUserClient
 ) {
 
     companion object {
@@ -47,17 +51,30 @@ class NewsAdminController(
     }
 
     @Get("/")
-    suspend fun getAllNews(@QueryValue(defaultValue = "0") page: Int,
-                            @QueryValue(defaultValue = "6") size: Int,
-                            @QueryValue tag: List<String>? = null,
-                            @QueryValue search: String? = null,
-                           @QueryValue status: Status? = null,
-                           @QueryValue publishingState: List<PublishingState>? = null): HttpResponse<Page<NewsDto>> = try {
-        HttpResponse.ok(newsService.getNews(page, size, tag, search, sort = Sort.of(Sort.Order.desc("updated"), Sort.Order.desc("created")), status = status, publishingStates = publishingState))
-    } catch (exception: Exception) {
-        LOG.error("Feil ved henting av news", exception)
-        HttpResponse.notFound()
-    }
+    suspend fun getAllNews(
+        @QueryValue(defaultValue = "0") page: Int,
+        @QueryValue(defaultValue = "6") size: Int,
+        @QueryValue tag: List<String>? = null,
+        @QueryValue search: String? = null,
+        @QueryValue status: Status? = null,
+        @QueryValue publishingState: List<PublishingState>? = null
+    ): HttpResponse<Page<NewsDto>> =
+        try {
+            HttpResponse.ok(
+                newsService.getNews(
+                    page,
+                    size,
+                    tag,
+                    search,
+                    sort = Sort.of(Sort.Order.desc("updated"), Sort.Order.desc("created")),
+                    status = status,
+                    publishingStates = publishingState
+                )
+            )
+        } catch (exception: Exception) {
+            LOG.error("Feil ved henting av news", exception)
+            HttpResponse.notFound()
+        }
 
     @Get("/{id}")
     suspend fun getNewsById(id: UUID): HttpResponse<NewsDto> = try {
@@ -72,11 +89,16 @@ class NewsAdminController(
 
     @Post("/")
     suspend fun createNews(
-        @Body createNewsDto: CreateNewsDto): HttpResponse<UUID> {
-            if (createNewsDto.title.isBlank()) return HttpResponse.badRequest()
-            return try {
-                val now = LocalDateTime.now()
-                val saved = newsRepository.save(News(
+        @Header("Authorization") authorization: String,
+        @Body createNewsDto: CreateNewsDto
+    ): HttpResponse<UUID> {
+        if (notAuthenticated(authorization)) return HttpResponse.unauthorized()
+
+        if (createNewsDto.title.isBlank()) return HttpResponse.badRequest()
+        return try {
+            val now = LocalDateTime.now()
+            val saved = newsRepository.save(
+                News(
                     title = createNewsDto.title,
                     description = createNewsDto.description,
                     body = createNewsDto.body,
@@ -88,12 +110,13 @@ class NewsAdminController(
                     imageDescription = createNewsDto.imageDescription,
                     status = createNewsDto.status,
                     comment = createNewsDto.comment,
-                ))
-                val tagLinks = createNewsDto.tags.map { tagId ->
-                    NewsTags(NewsTagsId(tagId = UUID.fromString(tagId), newsId = saved.id))
-                }
-                newsTagsRepository.saveAll(tagLinks).toList()
-                HttpResponse.ok(saved.id)
+                )
+            )
+            val tagLinks = createNewsDto.tags.map { tagId ->
+                NewsTags(NewsTagsId(tagId = UUID.fromString(tagId), newsId = saved.id))
+            }
+            newsTagsRepository.saveAll(tagLinks).toList()
+            HttpResponse.ok(saved.id)
         } catch (exception: Exception) {
             LOG.error("Failed to create new news \"$createNewsDto\"", exception)
             HttpResponse.serverError()
@@ -102,9 +125,12 @@ class NewsAdminController(
 
     @Put("/{id}")
     suspend fun updateNews(
+        @Header("Authorization") authorization: String,
         @Body newsDto: CreateNewsDto,
         id: UUID,
     ): HttpResponse<String> {
+        if (notAuthenticated(authorization)) return HttpResponse.unauthorized()
+
         val news = newsRepository.findById(id) ?: return HttpResponse.notFound()
         return try {
             val updatedNews = news.copy(
@@ -133,7 +159,12 @@ class NewsAdminController(
     }
 
     @Delete("/{id}")
-    suspend fun deleteNews(id: UUID): HttpResponse<String> {
+    suspend fun deleteNews(
+        @Header("Authorization") authorization: String,
+        id: UUID
+    ): HttpResponse<String> {
+        if (notAuthenticated(authorization)) return HttpResponse.unauthorized()
+
         if (!newsRepository.existsById(id)) return HttpResponse.notFound()
         return try {
             newsRepository.deleteById(id)
@@ -149,7 +180,12 @@ class NewsAdminController(
         consumes = [MULTIPART_FORM_DATA],
         produces = [APPLICATION_JSON]
     )
-    suspend fun uploadNewsImage(newsId: UUID, files: Publisher<CompletedFileUpload>): HttpResponse<MediaDTO> {
+    suspend fun uploadNewsImage(
+        @Header("Authorization") authorization: String,
+        newsId: UUID, files: Publisher<CompletedFileUpload>
+    ): HttpResponse<MediaDTO> {
+        if (notAuthenticated(authorization)) return HttpResponse.unauthorized()
+
         val news = newsRepository.findById(newsId) ?: return HttpResponse.notFound()
         val file = files.asFlow().firstOrNull() ?: return HttpResponse.badRequest()
         val media = mediaUploadService.uploadMedia(file, newsId, ObjectType.UNKNOWN)
@@ -162,8 +198,17 @@ class NewsAdminController(
         HttpResponse.ok(mediaUploadService.getMediaList(newsId))
 
     @Delete("/media/{newsId}/{uri}")
-    suspend fun deleteMedia(newsId: UUID, uri: String): HttpResponse<MediaDTO> {
+    suspend fun deleteMedia(
+        @Header("Authorization") authorization: String,
+        newsId: UUID, 
+        uri: String
+    ): HttpResponse<MediaDTO> {
+        if (notAuthenticated(authorization)) return HttpResponse.unauthorized()
+
         LOG.info("Deleting media for news $newsId, uri: $uri")
         return HttpResponse.ok(mediaUploadService.deleteByOidAndUri(newsId, uri))
     }
+
+    suspend fun notAuthenticated(authorization: String) =
+        !azureAdUserClient.validateToken(AuthBody(token = authorization.removePrefix("Bearer "))).active
 }

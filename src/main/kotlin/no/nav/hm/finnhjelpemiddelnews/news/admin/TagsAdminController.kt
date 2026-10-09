@@ -2,25 +2,29 @@ package no.nav.hm.finnhjelpemiddelnews.news.admin
 
 import io.micronaut.http.HttpResponse
 import io.micronaut.http.annotation.Body
-import org.slf4j.LoggerFactory
 import io.micronaut.http.annotation.Controller
 import io.micronaut.http.annotation.Delete
 import io.micronaut.http.annotation.Get
+import io.micronaut.http.annotation.Header
 import io.micronaut.http.annotation.Post
 import io.micronaut.http.annotation.Put
+import java.util.UUID
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
+import no.nav.hm.finnhjelpemiddelnews.auth.AuthBody
+import no.nav.hm.finnhjelpemiddelnews.auth.AzureAdUserClient
 import no.nav.hm.finnhjelpemiddelnews.news.CreateTagDto
 import no.nav.hm.finnhjelpemiddelnews.news.NewsTagsRepository
 import no.nav.hm.finnhjelpemiddelnews.news.TagDto
 import no.nav.hm.finnhjelpemiddelnews.news.Tags
 import no.nav.hm.finnhjelpemiddelnews.news.TagsRepository
-import java.util.UUID
+import org.slf4j.LoggerFactory
 
 @Controller("/admin/tags")
 class TagsAdminController(
     private val tagsRepository: TagsRepository,
     private val newsTagsRepository: NewsTagsRepository,
+    private val azureAdUserClient: AzureAdUserClient
 ) {
 
     companion object {
@@ -28,7 +32,12 @@ class TagsAdminController(
     }
 
     @Post("/")
-    suspend fun createTags(@Body createTagDto: CreateTagDto): HttpResponse<UUID> {
+    suspend fun createTags(
+        @Header("Authorization") authorization: String,
+        @Body createTagDto: CreateTagDto
+    ): HttpResponse<UUID> {
+        if (notAuthenticated(authorization)) return HttpResponse.unauthorized()
+
         if (createTagDto.tag.isBlank()) return HttpResponse.badRequest()
         return try {
             val tag = tagsRepository.save(Tags(tag = createTagDto.tag))
@@ -40,7 +49,12 @@ class TagsAdminController(
     }
 
     @Put("/{id}")
-    suspend fun updateTag(@Body tagDto: CreateTagDto, id: UUID): HttpResponse<String> {
+    suspend fun updateTag(
+        @Header("Authorization") authorization: String,
+        @Body tagDto: CreateTagDto, id: UUID
+    ): HttpResponse<String> {
+        if (notAuthenticated(authorization)) return HttpResponse.unauthorized()
+
         val tag = tagsRepository.findById(id) ?: return HttpResponse.notFound()
         return try {
             tagsRepository.update(tag.copy(tag = tagDto.tag))
@@ -52,7 +66,12 @@ class TagsAdminController(
     }
 
     @Delete("/{id}")
-    suspend fun deleteTag(id: UUID): HttpResponse<String> {
+    suspend fun deleteTag(
+        @Header("Authorization") authorization: String,
+        id: UUID
+    ): HttpResponse<String> {
+        if (notAuthenticated(authorization)) return HttpResponse.unauthorized()
+
         if (!tagsRepository.existsById(id)) return HttpResponse.notFound()
         return try {
             tagsRepository.deleteById(id)
@@ -80,4 +99,7 @@ class TagsAdminController(
         LOG.error("Feil ved henting av tags", exception)
         HttpResponse.notFound()
     }
+
+    suspend fun notAuthenticated(authorization: String) =
+        !azureAdUserClient.validateToken(AuthBody(token = authorization.removePrefix("Bearer "))).active
 }
