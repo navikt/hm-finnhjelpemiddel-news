@@ -3,14 +3,9 @@ package no.nav.hm.finnhjelpemiddelnews.news.admin
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.micronaut.http.HttpStatus
-import io.micronaut.test.annotation.MockBean
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest
-import io.mockk.coEvery
-import io.mockk.mockk
 import java.time.LocalDateTime
 import kotlinx.coroutines.runBlocking
-import no.nav.hm.finnhjelpemiddelnews.auth.AuthResponse
-import no.nav.hm.finnhjelpemiddelnews.auth.AzureAdUserClient
 import no.nav.hm.finnhjelpemiddelnews.news.CreateNewsDto
 import no.nav.hm.finnhjelpemiddelnews.news.News
 import no.nav.hm.finnhjelpemiddelnews.news.NewsController
@@ -25,16 +20,6 @@ class NewsAdminControllerTest(
     private val newsRepository: NewsRepository,
     private val newsAdminController: NewsAdminController
 ) {
-
-    @MockBean(AzureAdUserClient::class)
-    fun mockAzureAdUserClient(): AzureAdUserClient = mockk<AzureAdUserClient>().apply {
-        coEvery {
-            validateToken(any())
-        } answers {
-            AuthResponse(active = true)
-        }
-    }
-
     val newsDto = News(
         title = "Nyhet 1",
         description = "Deez nuts",
@@ -60,10 +45,7 @@ class NewsAdminControllerTest(
             responseNewsDto.status shouldBe HttpStatus.OK
             responseNewsDto.body()?.body shouldBe newsDto.body
 
-            newsAdminController.deleteNews(
-                authorization = "auth",
-                newsDto.id
-            )
+            newsAdminController.deleteNews(newsDto.id)
             val res = newsController.getNewsById(newsDto.id)
             res.status shouldBe HttpStatus.NOT_FOUND
         }
@@ -83,10 +65,7 @@ class NewsAdminControllerTest(
                 tags = emptyList(),
                 status = Status.PUBLISHED
             )
-            val createdId = newsAdminController.createNews(
-                authorization = "auth",
-                dto
-            ).body()!!
+            val createdId = newsAdminController.createNews(dto).body()!!
 
             val created = newsRepository.findById(createdId)
             created?.body shouldBe dto.body
@@ -107,10 +86,7 @@ class NewsAdminControllerTest(
                 tags = emptyList(),
                 status = Status.PUBLISHED
             )
-            val response = newsAdminController.updateNews(
-                authorization = "auth",
-                updatedNews, newsDto.id
-            )
+            val response = newsAdminController.updateNews(updatedNews, newsDto.id)
             response.status shouldBe HttpStatus.OK
 
             val fetched = newsController.getNewsById(newsDto.id)
@@ -136,15 +112,9 @@ class NewsAdminControllerTest(
                 tags = emptyList(),
                 status = Status.PUBLISHED
             )
-            val createdNewsId = newsAdminController.createNews(
-                authorization = "auth",
-                dto
-            ).body()!!
+            val createdNewsId = newsAdminController.createNews(dto).body()!!
 
-            newsAdminController.deleteNews(
-                authorization = "auth",
-                createdNewsId
-            )
+            newsAdminController.deleteNews(createdNewsId)
 
 
             val res = newsController.getNewsById(createdNewsId)
@@ -166,10 +136,7 @@ class NewsAdminControllerTest(
                 tags = emptyList(),
                 status = Status.PUBLISHED
             )
-            val createdNewsId = newsAdminController.createNews(
-                authorization = "auth",
-                dto
-            )
+            val createdNewsId = newsAdminController.createNews(dto)
 
             createdNewsId.status shouldBe HttpStatus.BAD_REQUEST
         }

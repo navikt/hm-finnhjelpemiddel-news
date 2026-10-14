@@ -4,14 +4,9 @@ import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.micronaut.http.HttpStatus
-import io.micronaut.test.annotation.MockBean
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest
-import io.mockk.coEvery
-import io.mockk.mockk
 import java.time.LocalDateTime
 import kotlinx.coroutines.runBlocking
-import no.nav.hm.finnhjelpemiddelnews.auth.AuthResponse
-import no.nav.hm.finnhjelpemiddelnews.auth.AzureAdUserClient
 import no.nav.hm.finnhjelpemiddelnews.news.CreateTagDto
 import no.nav.hm.finnhjelpemiddelnews.news.News
 import no.nav.hm.finnhjelpemiddelnews.news.NewsRepository
@@ -26,16 +21,6 @@ class TagsAdminControllerTest(
     private val tagsRepository: TagsRepository,
     private val newsRepository: NewsRepository,
 ) {
-
-    @MockBean(AzureAdUserClient::class)
-    fun mockAzureAdUserClient(): AzureAdUserClient = mockk<AzureAdUserClient>().apply {
-        coEvery {
-            validateToken(any())
-        } answers {
-            AuthResponse(active = true)
-        }
-    }
-
     val news = News(
         title = "Testnyheten", description = "Test", body = "Innhold",
         created = LocalDateTime.now(), publishedFrom = LocalDateTime.now(),
@@ -52,10 +37,7 @@ class TagsAdminControllerTest(
     @Test
     fun createTagTest() {
         runBlocking {
-            val response = tagsAdminController.createTags(
-                authorization = "auth",
-                CreateTagDto(tag = "Fra hjelpemiddelområdet")
-            )
+            val response = tagsAdminController.createTags(CreateTagDto(tag = "Fra hjelpemiddelområdet"))
 
             response.status shouldBe HttpStatus.OK
             response.body() shouldNotBe null
@@ -69,10 +51,7 @@ class TagsAdminControllerTest(
     @Test
     fun badBlankTagTest() {
         runBlocking {
-            val response = tagsAdminController.createTags(
-                authorization = "auth",
-                CreateTagDto(tag = "")
-            )
+            val response = tagsAdminController.createTags(CreateTagDto(tag = ""))
 
             response.status shouldBe HttpStatus.BAD_REQUEST
         }
@@ -81,15 +60,9 @@ class TagsAdminControllerTest(
     @Test
     fun updateTag() {
         runBlocking {
-            val tagId = tagsAdminController.createTags(
-                authorization = "auth",
-                CreateTagDto(tag = "gammel")
-            ).body()!!
+            val tagId = tagsAdminController.createTags(CreateTagDto(tag = "gammel")).body()!!
 
-            val response = tagsAdminController.updateTag(
-                authorization = "auth",
-                CreateTagDto(tag = "ny"), tagId
-            )
+            val response = tagsAdminController.updateTag(CreateTagDto(tag = "ny"), tagId)
 
             response.status shouldBe HttpStatus.OK
             tagsRepository.findById(tagId)!!.tag shouldBe "ny"
@@ -99,16 +72,10 @@ class TagsAdminControllerTest(
     @Test
     fun deleteTag() {
         runBlocking {
-            val tagId = tagsAdminController.createTags(
-                authorization = "auth",
-                CreateTagDto(tag = "slettemeg")
-            ).body()!!
+            val tagId = tagsAdminController.createTags(CreateTagDto(tag = "slettemeg")).body()!!
             tagsRepository.existsById(tagId) shouldBe true
 
-            tagsAdminController.deleteTag(
-                authorization = "auth",
-                tagId
-            )
+            tagsAdminController.deleteTag(tagId)
 
             tagsRepository.existsById(tagId) shouldBe false
         }
@@ -118,14 +85,8 @@ class TagsAdminControllerTest(
     @Test
     fun listAllTagsTest() {
         runBlocking {
-            tagsAdminController.createTags(
-                authorization = "auth",
-                CreateTagDto(tag = "listetest1")
-            )
-            tagsAdminController.createTags(
-                authorization = "auth",
-                CreateTagDto(tag = "listetest2")
-            )
+            tagsAdminController.createTags(CreateTagDto(tag = "listetest1"))
+            tagsAdminController.createTags(CreateTagDto(tag = "listetest2"))
 
             val response = tagsAdminController.getTagsList()
 
