@@ -7,14 +7,14 @@ plugins {
     kotlin("jvm") version "2.4.10"
     kotlin("plugin.allopen") version "2.4.10"
     id("com.gradleup.shadow") version "9.6.1"
-    id("io.micronaut.application") version "5.0.0"
+    id("io.micronaut.application") version "5.0.2"
     id("io.micronaut.aot") version "5.0.0"
     id("com.google.devtools.ksp") version "2.3.10"
 }
 
 group = "no.nav.hm"
 
-val micronautVersion = "5.0.6"
+val micronautVersion = "5.2.2"
 val poiVersion = "5.5.0"
 val jvmTarget = "25"
 val postgresVersion = "42.7.12"
